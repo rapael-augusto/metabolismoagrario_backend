@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+model User {
+  id           String  @id
+  name         String
+  email        String  @unique
+  password     String
+  refreshToken String?
+}
+
+model Crops {
+  id             String @id
+  name           String
+  scientificName String
+
+  constants Constant[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Constant {
+  id        String        @id
+  value     Float
+  reference String
+  comment   String
+  type      ConstantTypes
+  Crops     Crops?        @relation(fields: [cropsId], references: [id])
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  cropsId String?
+}
+
+enum ConstantTypes {
+  HARVEST_INDEX // INDICE DE COLHEITA
+  AERIAL_RESIDUE_INDEX // ÍNDICE DE RESÍDUO DA PARTE AÉREA
+  PRODUCT_RESIDUE_INDEX // ÍNDICE DE RESÍDUO DO PRODUTO
+  PRODUCT_DRY_MATTER_FACTOR // TEOR DA MATÉRIA SECA COLHIDA
+  RESIDUE_DRY_MATTER_FACTOR // TEOR DA MATÉRIA SECA RESÍDUO
+  BELOWGROUND_INDEX // ÍNDICE DE RAIZ (Belowground Biomass in the sheet, maybe?)
+  WEED_AERIAL_FACTOR // FATOR DE CONVERSÃO PARA ESTIMAR A BIOMASSA AÉREA DAS ADVENTÍCIAS (where in the sheet?)
+  WEED_BELOWGROUND_INDEX // ÍNDICE DE RAIZ ADVENTÍCIAS (where in the sheet?)
+}
