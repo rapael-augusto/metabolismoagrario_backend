@@ -28,6 +28,6 @@ export class UsersService {
   }
 
   async findAll() { // TODO remove later. Just for testing
-    return await this.userRepository.list()
+    return (await this.userRepository.list()).map(user => ({ ...user, password: undefined }))
   }
 }
