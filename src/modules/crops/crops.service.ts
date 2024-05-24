@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCropDto } from './dto/create-crop.dto';
 import { CropsRepository } from '@db/repositories/crops.repository';
 import { randomUUID } from 'node:crypto';
+import { Climates, Crop } from '@prisma/client';
 
 @Injectable()
 export class CropsService {
@@ -17,14 +18,23 @@ export class CropsService {
 
   async findAll() {
     const crops = await this.cropsRepository.list()
-    const groupedCrops = crops.reduce((acc, crop) => {
-      const { climate } = crop;
-      if (!acc[climate]) {
-        acc[climate] = [];
-      }
-      acc[climate].push(crop);
-      return acc;
-    }, {} as Record<string, typeof crops>);
+
+    const groupedCrops: Record<Climates, Crop[]> = {
+      TropicalRainforest: [],
+      Tropical: [],
+      Subtropical: [],
+      Desert: [],
+      Temperate: [],
+      Mediterranean: [],
+      SemiArid: [],
+      Subpolar: [],
+      MountainCold: [],
+      Polar: [],
+    }
+
+    crops.forEach(crop => {
+      groupedCrops[crop.climate].push(crop)
+    })
 
     return groupedCrops;
   }
