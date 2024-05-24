@@ -24,9 +24,10 @@ model User {
 }
 
 model Crop {
-  id             String @id
+  id             String   @id
   name           String
   scientificName String
+  climate        Climates
 
   constants Constant[]
 
@@ -46,6 +47,19 @@ model Constant {
   updatedAt DateTime @updatedAt
 
   cropId String?
+}
+
+enum Climates {
+  TropicalRainforest // Equatorial
+  Tropical // Tropical
+  Subtropical // Subtropical
+  Desert // Deserto
+  Temperate // Temperado
+  Mediterranean // Mediterrâneo
+  SemiArid // Semiárido
+  Subpolar // Frio
+  MountainCold // Frio da montanha
+  Polar // Polar
 }
 
 enum ConstantTypes {

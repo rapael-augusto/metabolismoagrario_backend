@@ -1,4 +1,5 @@
-import { Length } from "class-validator"
+import { Climates } from "@prisma/client";
+import { IsEnum, Length } from "class-validator"
 
 export class CreateCropDto {
   @Length(1, 80)
@@ -6,4 +7,7 @@ export class CreateCropDto {
 
   @Length(1, 80)
   scientificName: string
+
+  @IsEnum(Climates)
+  climate: Climates;
 }

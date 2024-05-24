@@ -8,7 +8,7 @@ export class CropsConstantsService {
   constructor(private cropsConstantsRepository: ConstantsRepository) { }
 
   async create(cropId: string, createCropsConstantDto: CreateCropsConstantsDto) {
-    await this.cropsConstantsRepository.createMany(createCropsConstantDto.constants.map(constant =>
+    return await this.cropsConstantsRepository.createMany(createCropsConstantDto.constants.map(constant =>
       ({ id: randomUUID(), cropId, ...constant, })))
   }
 

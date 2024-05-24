@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
-import { Crop } from "@prisma/client";
+import { Climates, Crop } from "@prisma/client";
 
 
 interface CreateCropDto {
   id: string
   name: string
   scientificName: string
+  climate: Climates
 }
 
 @Injectable()

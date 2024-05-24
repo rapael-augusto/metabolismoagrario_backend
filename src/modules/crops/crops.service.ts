@@ -16,7 +16,17 @@ export class CropsService {
   }
 
   async findAll() {
-    return await this.cropsRepository.list()
+    const crops = await this.cropsRepository.list()
+    const groupedCrops = crops.reduce((acc, crop) => {
+      const { climate } = crop;
+      if (!acc[climate]) {
+        acc[climate] = [];
+      }
+      acc[climate].push(crop);
+      return acc;
+    }, {} as Record<string, typeof crops>);
+
+    return groupedCrops;
   }
 
   async findOne(id: string) {

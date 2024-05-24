@@ -16,7 +16,7 @@ export class ConstantsRepository {
   constructor(private prisma: PrismaService) { }
 
   async createMany(data: CreateConstantDto[]) {
-    await this.prisma.constant.createMany({
+    return await this.prisma.constant.createMany({
       data,
     })
   }
