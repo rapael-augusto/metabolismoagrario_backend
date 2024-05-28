@@ -16,10 +16,11 @@ generator dbml {
 }
 
 model User {
-  id           String  @id
+  id           String    @id
   name         String
-  email        String  @unique
+  email        String    @unique
   password     String
+  role         UserRoles
   refreshToken String?
 }
 
@@ -47,6 +48,11 @@ model Constant {
   updatedAt DateTime @updatedAt
 
   cropId String?
+}
+
+enum UserRoles {
+  ADMIN
+  OPERATOR
 }
 
 enum Climates {

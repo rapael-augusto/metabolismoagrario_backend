@@ -2,7 +2,7 @@ import { User } from "@/types/index";
 import { Body, Controller, Param, Post, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "src/auth/decorators/current-user-decorator";
 import { PublicRoute } from "src/auth/decorators/public-route-decorator";
-import { RefreshJwtGuard } from "src/auth/refresh-jwt-auth.guard";
+import { RefreshJwtGuard } from "src/auth/guards/refresh-jwt-auth.guard";
 import { SessionService } from "./session.service";
 
 

@@ -22,12 +22,13 @@ export class UsersService {
       name: createUserDto.name,
       password: hashedPassword,
       refreshToken: null,
+      role: createUserDto.role,
     })
 
     return { ...user, password: undefined }
   }
 
-  async findAll() { // TODO remove later. Just for testing
-    return (await this.userRepository.list()).map(user => ({ ...user, password: undefined }))
+  async findAll() {
+    return (await this.userRepository.list()).map(user => ({ ...user, password: undefined, refreshToken: undefined }))
   }
 }

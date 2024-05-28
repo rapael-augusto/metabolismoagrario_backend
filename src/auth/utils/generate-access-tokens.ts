@@ -1,10 +1,12 @@
 import { User } from "@/types/index"
 import { JwtService } from "@nestjs/jwt"
+import { UserRoles } from "@prisma/client"
 
 export interface UserTokenPayload {
   sub: string
   name: string
   email: string
+  role: UserRoles
 }
 
 export async function generateAccessTokens(user: User, encrypter: JwtService) {
@@ -12,6 +14,7 @@ export async function generateAccessTokens(user: User, encrypter: JwtService) {
     sub: user.id, // token subject identifier
     name: user.name,
     email: user.email,
+    role: user.role,
   }
 
   const [accessToken, refreshToken] = await Promise.all([
