@@ -28,6 +28,27 @@ export class CropsRepository {
     return await this.prisma.crop.findUnique({ where: { id }, include: { constants: true } })
   }
 
+  async review({ id, status, reviewerId }: { id: string, status: Omit<ReviewStatus, 'Pending'>, reviewerId: string }) {
+    return await this.prisma.crop.update({
+      where: {
+        id,
+        status: 'Pending'
+      },
+      data: {
+        status: status as ReviewStatus,
+        reviewerId,
+      }
+    })
+  }
+
+  async listAllPending() {
+    return await this.prisma.crop.findMany({
+      where: {
+        status: ReviewStatus.Pending
+      }
+    })
+  }
+
   async listAllApproved() {
     return await this.prisma.crop.findMany({
       where: {

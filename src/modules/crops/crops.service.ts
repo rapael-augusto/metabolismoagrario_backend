@@ -3,9 +3,15 @@ import { CreateCropData, CropsRepository } from '@db/repositories/crops.reposito
 import { randomUUID } from 'node:crypto';
 import { Climates, Crop, User } from '@prisma/client';
 import { CreateCropDto } from './dto/create-crop.dto';
+import { ReviewCropDto } from './dto/review-crop.dto';
 
 interface CreateCropRequest extends CreateCropDto {
   user: User
+}
+
+interface ReviewCropRequest extends ReviewCropDto {
+  id: string
+  userId: string
 }
 
 @Injectable()
@@ -29,8 +35,47 @@ export class CropsService {
     return await this.cropsRepository.create(createCropData)
   }
 
+  async review(reviewRequest: ReviewCropRequest) { // admins are able to review pending crops created from operators
+    try {
+      return await this.cropsRepository.review({
+        id: reviewRequest.id,
+        reviewerId: reviewRequest.userId,
+        status: reviewRequest.status,
+      })
+    } catch (error) {
+      if (error.code === 'P2025') // 'Record to update not found.'
+        throw new NotFoundException(`Pending Crop with id=${reviewRequest.id} not found!`)
+
+      throw error
+    }
+
+  }
+
   async findAll() {
     const crops = await this.cropsRepository.listAllApproved()
+
+    const groupedCrops: Record<Climates, Crop[]> = {
+      TropicalRainforest: [],
+      Tropical: [],
+      Subtropical: [],
+      Desert: [],
+      Temperate: [],
+      Mediterranean: [],
+      SemiArid: [],
+      Subpolar: [],
+      MountainCold: [],
+      Polar: [],
+    }
+
+    crops.forEach(crop => {
+      groupedCrops[crop.climate].push(crop)
+    })
+
+    return groupedCrops;
+  }
+
+  async findAllPending() {
+    const crops = await this.cropsRepository.listAllPending()
 
     const groupedCrops: Record<Climates, Crop[]> = {
       TropicalRainforest: [],
