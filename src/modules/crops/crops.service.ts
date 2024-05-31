@@ -1,23 +1,36 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateCropDto } from './dto/create-crop.dto';
-import { CropsRepository } from '@db/repositories/crops.repository';
+import { CreateCropData, CropsRepository } from '@db/repositories/crops.repository';
 import { randomUUID } from 'node:crypto';
-import { Climates, Crop } from '@prisma/client';
+import { Climates, Crop, User } from '@prisma/client';
+import { CreateCropDto } from './dto/create-crop.dto';
+
+interface CreateCropRequest extends CreateCropDto {
+  user: User
+}
 
 @Injectable()
 export class CropsService {
   constructor(private cropsRepository: CropsRepository) { }
 
-  async create(createCropDto: CreateCropDto) {
-    return await this.cropsRepository.create({
+  async create(request: CreateCropRequest) {
+    let createCropData: CreateCropData = {
       id: randomUUID(),
-      ...createCropDto
-    })
+      name: request.name,
+      scientificName: request.scientificName,
+      climate: request.climate,
+      status: 'Approved', // ADMIN crops are created and approved by default
+      userId: request.user.id
+    }
 
+    if (request.user.role === 'OPERATOR') {
+      createCropData.status = "Pending" // OPERATOR crops are created with status pending and wait for admin approval
+    }
+
+    return await this.cropsRepository.create(createCropData)
   }
 
   async findAll() {
-    const crops = await this.cropsRepository.list()
+    const crops = await this.cropsRepository.listAllApproved()
 
     const groupedCrops: Record<Climates, Crop[]> = {
       TropicalRainforest: [],

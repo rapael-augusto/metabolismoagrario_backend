@@ -1,20 +1,22 @@
 import { Injectable } from "@nestjs/common";
+import { Climates, ReviewStatus } from "@prisma/client";
 import { PrismaService } from "../prisma.service";
-import { Climates, Crop } from "@prisma/client";
 
 
-interface CreateCropDto {
+export interface CreateCropData {
   id: string
   name: string
   scientificName: string
   climate: Climates
+  status: ReviewStatus
+  userId: string
 }
 
 @Injectable()
 export class CropsRepository {
   constructor(private prisma: PrismaService) { }
 
-  async create(data: CreateCropDto) {
+  async create(data: CreateCropData) {
     const crops = await this.prisma.crop.create({
       data,
     })
@@ -26,7 +28,11 @@ export class CropsRepository {
     return await this.prisma.crop.findUnique({ where: { id }, include: { constants: true } })
   }
 
-  async list() {
-    return await this.prisma.crop.findMany()
+  async listAllApproved() {
+    return await this.prisma.crop.findMany({
+      where: {
+        status: ReviewStatus.Approved
+      }
+    })
   }
 }

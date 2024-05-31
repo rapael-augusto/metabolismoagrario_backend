@@ -10,4 +10,4 @@ NODE 20.11.1
 - run `npx prisma db seed` to run seed and create default ADMIN user
 - run `npm run dev` to start the server
 
-When (if) prisma types bug when developing: just delete `node_modules/.prisma` folder and run `npm install` then `npx prisma generate`
+When (if) prisma types' bug when developing: just delete `node_modules/.prisma` folder and run `npm install` then `npx prisma generate`

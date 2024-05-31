@@ -9,6 +9,8 @@ Table User {
   password String [not null]
   role UserRoles [not null]
   refreshToken String
+  crops Crop [not null]
+  reviewedCrops Crop [not null]
 }
 
 Table Crop {
@@ -16,9 +18,14 @@ Table Crop {
   name String [not null]
   scientificName String [not null]
   climate Climates [not null]
+  status ReviewStatus [not null]
+  user User [not null]
+  reviewer User
   constants Constant [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
+  userId String [not null]
+  reviewerId String
 }
 
 Table Constant {
@@ -27,15 +34,21 @@ Table Constant {
   reference String [not null]
   comment String [not null]
   type ConstantTypes [not null]
-  crop Crop
+  crop Crop [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  cropId String
+  cropId String [not null]
 }
 
 Enum UserRoles {
   ADMIN
   OPERATOR
+}
+
+Enum ReviewStatus {
+  Pending
+  Approved
+  Declined
 }
 
 Enum Climates {
@@ -62,4 +75,8 @@ Enum ConstantTypes {
   WEED_BELOWGROUND_INDEX
 }
 
-Ref: Constant.cropId > Crop.id
+Ref: Crop.userId > User.id
+
+Ref: Crop.reviewerId > User.id
+
+Ref: Constant.cropId > Crop.id [delete: Cascade]
