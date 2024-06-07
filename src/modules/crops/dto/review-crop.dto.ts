@@ -1,5 +1,3 @@
-import { ReviewStatus } from "@prisma/client";
-import { IsEnum } from "class-validator";
 
 export enum ReviewStatusBody {
   Approved = 'Approved',
@@ -7,6 +5,6 @@ export enum ReviewStatusBody {
 }
 
 export class ReviewCropDto {
-  @IsEnum(ReviewStatusBody)
-  status: Omit<ReviewStatus, 'Pending'>
+  // @IsEnum(ReviewStatusBody)
+  // status: Omit<ReviewStatus, 'Pending'>
 }

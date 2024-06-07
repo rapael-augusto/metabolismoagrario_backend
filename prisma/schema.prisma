@@ -16,46 +16,53 @@ generator dbml {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String    @unique
-  password      String
-  role          UserRoles
-  refreshToken  String?
-  crops         Crop[]    @relation("user") // created crops
-  reviewedCrops Crop[]    @relation("reviewer")
+  id           String    @id
+  name         String
+  email        String    @unique
+  password     String
+  role         UserRoles
+  refreshToken String?
 }
 
 model Crop {
-  id             String       @id
+  id             String     @id
   name           String
   scientificName String
-  climate        Climates
-  status         ReviewStatus
-
-  user     User  @relation(fields: [userId], references: [id], name: "user") // user who created
-  reviewer User? @relation(fields: [reviewerId], references: [id], name: "reviewer")
-
-  constants Constant[]
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  userId     String
-  reviewerId String?
-}
-
-model Constant {
-  id        String        @id
-  value     Float
-  reference String
-  comment   String
-  type      ConstantTypes
-  crop      Crop          @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  cultivars      Cultivar[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
 
-  cropId String
+model Cultivar {
+  id   String @id
+  name String
+
+  constants Constant[]
+  crop      Crop       @relation(fields: [cropId], references: [id])
+  cropId    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Constant {
+  id                String            @id
+  value             Float
+  reference         String
+  comment           String
+  type              ConstantTypes
+  climate           Climates
+  biome             String
+  irrigation        IrrigationTypes
+  country           String
+  cultivationSystem CultivationSystem
+
+  cultivarId String
+  cultivar   Cultivar @relation(fields: [cultivarId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum UserRoles {
@@ -67,6 +74,17 @@ enum ReviewStatus {
   Pending
   Approved
   Declined
+}
+
+enum IrrigationTypes {
+  Irrigation
+  Dry
+}
+
+enum CultivationSystem {
+  Conventional
+  Organic
+  Agroecological
 }
 
 enum Climates {
