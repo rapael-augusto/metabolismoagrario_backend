@@ -47,16 +47,18 @@ model Cultivar {
 }
 
 model Constant {
-  id                String            @id
-  value             Float
-  reference         String
+  id        String        @id
+  value     Float
+  reference String
+  type      ConstantTypes
+
   comment           String
-  type              ConstantTypes
-  climate           Climates
-  biome             String
-  irrigation        IrrigationTypes
-  country           String
-  cultivationSystem CultivationSystem
+  climate           String?
+  biome             String?
+  irrigation        IrrigationTypes?
+  country           String?
+  soil              SoilTypes?
+  cultivationSystem CultivationSystem?
 
   cultivarId String
   cultivar   Cultivar @relation(fields: [cultivarId], references: [id])
@@ -87,17 +89,10 @@ enum CultivationSystem {
   Agroecological
 }
 
-enum Climates {
-  TropicalRainforest // Equatorial
-  Tropical // Tropical
-  Subtropical // Subtropical
-  Desert // Deserto
-  Temperate // Temperado
-  Mediterranean // Mediterrâneo
-  SemiArid // Semiárido
-  Subpolar // Frio
-  MountainCold // Frio da montanha
-  Polar // Polar
+enum SoilTypes {
+  Clayey // Argiloso
+  Sandy // Arenoso
+  SandyClay // Arenoargiloso
 }
 
 enum ConstantTypes {

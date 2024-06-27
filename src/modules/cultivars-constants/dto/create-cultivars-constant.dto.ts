@@ -1,6 +1,6 @@
-import { Climates, ConstantTypes, CultivationSystem, IrrigationTypes } from "@prisma/client";
-import { IsEnum, IsNumber, IsString } from "class-validator";
-
+import { BiomeTypes, ClimatesTypes } from "@/types/index";
+import { ConstantTypes, CultivationSystem, IrrigationTypes, SoilTypes } from "@prisma/client";
+import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateCultivarConstantDto {
   @IsNumber()
@@ -9,24 +9,33 @@ export class CreateCultivarConstantDto {
   @IsString()
   reference: string;
 
-  @IsString()
-  comment: string;
-
   @IsEnum(ConstantTypes)
   type: ConstantTypes;
 
-  @IsEnum(Climates)
-  climate: Climates;
-
   @IsString()
-  biome: string
+  comment: string;
 
+  @IsOptional()
+  @IsEnum(ClimatesTypes)
+  climate?: ClimatesTypes;
+
+  @IsOptional()
+  @IsEnum(BiomeTypes)
+  biome?: BiomeTypes;
+
+  @IsOptional()
   @IsEnum(IrrigationTypes)
-  irrigation: IrrigationTypes
+  irrigation?: IrrigationTypes
 
+  @IsOptional()
   @IsString()
-  country: string
+  country?: string
 
+  @IsOptional()
   @IsEnum(CultivationSystem)
-  cultivationSystem: CultivationSystem
+  cultivationSystem?: CultivationSystem
+
+  @IsOptional()
+  @IsEnum(SoilTypes)
+  soil?: SoilTypes
 }

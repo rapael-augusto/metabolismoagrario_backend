@@ -1,18 +1,20 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
-import { Climates, ConstantTypes, CultivationSystem, IrrigationTypes, } from "@prisma/client";
+import { ConstantTypes, CultivationSystem, IrrigationTypes, SoilTypes, } from "@prisma/client";
+import { BiomeTypes, ClimatesTypes } from "@/types/index";
 
 interface CreateConstantDto {
   id: string
   value: number;
   reference: string;
-  comment: string;
   type: ConstantTypes;
-  climate: Climates;
-  biome: string
-  irrigation: IrrigationTypes
-  country: string
-  cultivationSystem: CultivationSystem
+  comment: string;
+  climate?: ClimatesTypes;
+  biome?: BiomeTypes
+  irrigation?: IrrigationTypes
+  country?: string
+  cultivationSystem?: CultivationSystem
+  soil?: SoilTypes
   cultivarId: string
 }
 
