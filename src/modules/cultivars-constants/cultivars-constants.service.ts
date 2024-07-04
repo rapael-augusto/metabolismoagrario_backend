@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCultivarConstantDto } from './dto/create-cultivars-constant.dto';
 import { ConstantsRepository } from '@db/repositories/constants.repository';
 import { randomUUID } from 'node:crypto';
@@ -12,6 +12,11 @@ export class CultivarsConstantsService {
   }
 
   async remove(id: string) {
-    return `This action removes a #${id} cultivarsConstant`;
+    console.log(`Constante ${id} removida com sucesso`)
+    try {
+      return await this.cultivarsConstantsRepository.remove(id)
+    } catch(error) {
+      throw new NotFoundException(error)
+    }
   }
 }
