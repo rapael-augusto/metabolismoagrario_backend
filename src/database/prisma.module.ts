@@ -4,6 +4,7 @@ import { UserRepository } from './repositories/user.repository';
 import { CropsRepository } from './repositories/crops.repository';
 import { ConstantsRepository } from './repositories/constants.repository';
 import { CultivarsRepository } from './repositories/cultivars.repository';
+import {BibliographicReferencesRepository} from '../database/repositories/bibliographic-references.repository'
 
 @Module({
   providers: [
@@ -12,7 +13,8 @@ import { CultivarsRepository } from './repositories/cultivars.repository';
     CropsRepository,
     CultivarsRepository,
     ConstantsRepository,
+    BibliographicReferencesRepository,
   ],
-  exports: [UserRepository, CropsRepository, CultivarsRepository, ConstantsRepository],
+  exports: [UserRepository, CropsRepository, CultivarsRepository, ConstantsRepository, BibliographicReferencesRepository],
 })
 export class DatabaseModule { }

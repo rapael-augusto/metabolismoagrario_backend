@@ -6,6 +6,7 @@ datasource db {
   provider = "postgresql" // ou o provedor que você está usando
   url      = env("DATABASE_URL")
 }
+
 model User {
   id           String    @id @default(uuid())
   name         String
@@ -17,9 +18,8 @@ model User {
   updatedAt    DateTime  @updatedAt
 }
 
-
 model BibliographicReference {
-  id         String    @id @default(uuid())
+  id         Int        @id @default(autoincrement())
   authorName String
   title      String
   year       Int
@@ -28,48 +28,49 @@ model BibliographicReference {
 }
 
 model Constant {
-  id                        String                 @id @default(uuid())
-  value                     Float
-  reference                 String
-  type                      ConstantTypes
-  comment                   String?
-  climate                   String?
-  biome                     String?
-  irrigation                IrrigationTypes?
-  country                   String?
-  soil                      SoilTypes?
-  cultivationSystem         CultivationSystem?
-  cultivarId                String
-  cultivar                  Cultivar               @relation(fields: [cultivarId], references: [id])
-  createdAt                 DateTime               @default(now())
-  updatedAt                 DateTime               @updatedAt
-  bibliographicReferenceId  String?
-  bibliographicReference    BibliographicReference? @relation(fields: [bibliographicReferenceId], references: [id], name: "BibliographicReferenceConstants")
+  id                       String                  @id @default(uuid())
+  value                    Float
+  reference                String
+  type                     ConstantTypes
+  comment                  String?
+  climate                  String?
+  biome                    String?
+  irrigation               IrrigationTypes?
+  country                  String?
+  soil                     SoilTypes?
+  cultivationSystem        CultivationSystem?
+  cultivarId               String
+  cultivar                 Cultivar                @relation(fields: [cultivarId], references: [id])
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  bibliographicReferenceId Int?
+  bibliographicReference   BibliographicReference? @relation(fields: [bibliographicReferenceId], references: [id], name: "BibliographicReferenceConstants")
 }
 
 model Crop {
-  id            String     @id @default(uuid())
-  name          String
+  id             String     @id @default(uuid())
+  name           String
   scientificName String
-  cultivars     Cultivar[]
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  cultivars      Cultivar[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 }
 
 model Cultivar {
-  id         String      @id @default(uuid())
-  name       String
-  constants  Constant[]
-  crop       Crop        @relation(fields: [cropId], references: [id])
-  cropId     String
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id        String     @id @default(uuid())
+  name      String
+  constants Constant[]
+  crop      Crop       @relation(fields: [cropId], references: [id])
+  cropId    String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 enum UserRoles {
   ADMIN
   OPERATOR
 }
+
 enum ReviewStatus {
   Pending
   Approved
