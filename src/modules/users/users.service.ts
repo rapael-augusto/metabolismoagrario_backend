@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserRepository } from 'src/database/repositories/user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { randomUUID } from 'node:crypto';
-import { hash as bcryptHash } from 'bcrypt'
+import { hash as bcryptHash } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -14,7 +14,9 @@ export class UsersService {
       throw new BadRequestException('User already exists');
     }
 
-    const hashedPassword = await bcryptHash(createUserDto.password, 8)
+    const hashedPassword = await bcryptHash(createUserDto.password, 8);
+
+    const currentDate = new Date();
 
     const user = await this.userRepository.create({
       id: randomUUID(),
@@ -23,12 +25,14 @@ export class UsersService {
       password: hashedPassword,
       refreshToken: null,
       role: createUserDto.role,
-    })
+      createdAt: currentDate,
+      updatedAt: currentDate,
+    });
 
-    return { ...user, password: undefined }
+    return { ...user, password: undefined };
   }
 
   async findAll() {
-    return (await this.userRepository.list()).map(user => ({ ...user, password: undefined, refreshToken: undefined }))
+    return (await this.userRepository.list()).map(user => ({ ...user, password: undefined, refreshToken: undefined }));
   }
 }
