@@ -20,7 +20,7 @@ import { RoleGuard } from "./guards/role.guard";
   ],
   providers: [JwtStrategy, RefreshJwtStrategy,
     {
-      provide: APP_GUARD, // defaultly protecting all routes with JwtAuthGuard
+      provide: APP_GUARD, // defaultly protecting all  with JwtAuthGuard
       useClass: JwtAuthGuard,
     },
     {

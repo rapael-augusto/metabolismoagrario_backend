@@ -9,7 +9,7 @@ export class CropsService {
   constructor(private cropsRepository: CropsRepository) { }
 
   async create(request: CreateCropDto) {
-    let createCropData: CreateCropData = {
+    const createCropData: CreateCropData = {
       id: randomUUID(),
       name: request.name,
       scientificName: request.scientificName,

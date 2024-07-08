@@ -3,75 +3,73 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql" // ou o provedor que você está usando
   url      = env("DATABASE_URL")
 }
-
-generator erd {
-  provider = "prisma-erd-generator"
-}
-
-generator dbml {
-  provider = "prisma-dbml-generator"
-}
-
 model User {
-  id           String    @id
+  id           String    @id @default(uuid())
   name         String
   email        String    @unique
   password     String
   role         UserRoles
   refreshToken String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
-model Crop {
-  id             String     @id
-  name           String
-  scientificName String
-  cultivars      Cultivar[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Cultivar {
-  id   String @id
-  name String
-
-  constants Constant[]
-  crop      Crop       @relation(fields: [cropId], references: [id])
-  cropId    String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model BibliographicReference {
+  id         String    @id @default(uuid())
+  authorName String
+  title      String
+  year       Int
+  source     String
+  constants  Constant[] @relation("BibliographicReferenceConstants")
 }
 
 model Constant {
-  id        String        @id
-  value     Float
-  reference String
-  type      ConstantTypes
+  id                        String                 @id @default(uuid())
+  value                     Float
+  reference                 String
+  type                      ConstantTypes
+  comment                   String?
+  climate                   String?
+  biome                     String?
+  irrigation                IrrigationTypes?
+  country                   String?
+  soil                      SoilTypes?
+  cultivationSystem         CultivationSystem?
+  cultivarId                String
+  cultivar                  Cultivar               @relation(fields: [cultivarId], references: [id])
+  createdAt                 DateTime               @default(now())
+  updatedAt                 DateTime               @updatedAt
+  bibliographicReferenceId  String?
+  bibliographicReference    BibliographicReference? @relation(fields: [bibliographicReferenceId], references: [id], name: "BibliographicReferenceConstants")
+}
 
-  comment           String
-  climate           String?
-  biome             String?
-  irrigation        IrrigationTypes?
-  country           String?
-  soil              SoilTypes?
-  cultivationSystem CultivationSystem?
+model Crop {
+  id            String     @id @default(uuid())
+  name          String
+  scientificName String
+  cultivars     Cultivar[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
 
-  cultivarId String
-  cultivar   Cultivar @relation(fields: [cultivarId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Cultivar {
+  id         String      @id @default(uuid())
+  name       String
+  constants  Constant[]
+  crop       Crop        @relation(fields: [cropId], references: [id])
+  cropId     String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
 enum UserRoles {
   ADMIN
   OPERATOR
 }
-
 enum ReviewStatus {
   Pending
   Approved
@@ -90,18 +88,18 @@ enum CultivationSystem {
 }
 
 enum SoilTypes {
-  Clayey // Argiloso
-  Sandy // Arenoso
-  SandyClay // Arenoargiloso
+  Clayey
+  Sandy
+  SandyClay
 }
 
 enum ConstantTypes {
-  HARVEST_INDEX // INDICE DE COLHEITA
-  AERIAL_RESIDUE_INDEX // ÍNDICE DE RESÍDUO DA PARTE AÉREA
-  PRODUCT_RESIDUE_INDEX // ÍNDICE DE RESÍDUO DO PRODUTO
-  PRODUCT_DRY_MATTER_FACTOR // TEOR DA MATÉRIA SECA COLHIDA
-  RESIDUE_DRY_MATTER_FACTOR // TEOR DA MATÉRIA SECA RESÍDUO
-  BELOWGROUND_INDEX // ÍNDICE DE RAIZ (Belowground Biomass in the sheet, maybe?)
-  WEED_AERIAL_FACTOR // FATOR DE CONVERSÃO PARA ESTIMAR A BIOMASSA AÉREA DAS ADVENTÍCIAS (where in the sheet?)
-  WEED_BELOWGROUND_INDEX // ÍNDICE DE RAIZ ADVENTÍCIAS (where in the sheet?)
+  HARVEST_INDEX
+  AERIAL_RESIDUE_INDEX
+  PRODUCT_RESIDUE_INDEX
+  PRODUCT_DRY_MATTER_FACTOR
+  RESIDUE_DRY_MATTER_FACTOR
+  BELOWGROUND_INDEX
+  WEED_AERIAL_FACTOR
+  WEED_BELOWGROUND_INDEX
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, NotFoundException, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Post } from '@nestjs/common';
 import { CultivarsConstantsService } from './cultivars-constants.service';
 import { CreateCultivarConstantDto } from './dto/create-cultivars-constant.dto';
 import { Role } from 'src/auth/decorators/user-role-decorator';
@@ -16,10 +16,6 @@ export class CultivarsConstantsController {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    try {
-      return await this.cultivarsConstantsService.remove(id)
-    } catch (error) {
-      throw new NotFoundException(`Fator de conversão com ID ${id} não encontrado`)
-    }
+    return await this.cultivarsConstantsService.remove(id);
   }
 }
