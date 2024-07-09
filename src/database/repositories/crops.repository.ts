@@ -1,5 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
+import { UpdateCropDto } from "@modules/crops/dto/update-crop.dto";
 
 
 export interface CreateCropData {
@@ -26,5 +27,27 @@ export class CropsRepository {
 
   async listAll() {
     return await this.prisma.crop.findMany()
+  }
+
+  async update(id: string, data: UpdateCropDto) {
+    console.log({data})
+    try {
+      return await this.prisma.crop.update({
+        where: {
+          id
+        }, 
+        data,
+      })
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async remove(id: string) {
+    try {
+      return await this.prisma.crop.delete({ where: { id } })
+    } catch (error) {
+      throw new NotFoundException(`Cultura com ${id} não existe`)
+    }
   }
 }
