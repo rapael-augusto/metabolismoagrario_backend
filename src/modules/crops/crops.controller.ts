@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
 import { User, UserRoles } from '@prisma/client';
 import { CurrentUser } from 'src/auth/decorators/current-user-decorator';
 import { PublicRoute } from 'src/auth/decorators/public-route-decorator';
 import { CropsService } from './crops.service';
 import { CreateCropDto } from './dto/create-crop.dto';
 import { Role } from 'src/auth/decorators/user-role-decorator';
+import { UpdateCropDto } from './dto/update-crop.dto';
 
 @Controller('crops')
 export class CropsController {
@@ -28,8 +29,21 @@ export class CropsController {
     return await this.cropsService.findOne(id);
   }
 
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() updateCropDto: UpdateCropDto) {
+    try {
+      return await this.cropsService.update(id, updateCropDto)
+    } catch (error) {
+      throw new error
+    }
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return await this.cropsService.remove(id);
+    try {
+      return await this.cropsService.remove(id);
+    } catch (error) {
+      throw new NotFoundException(`Cultura com id ${id} não existe`)
+    }
   }
 }

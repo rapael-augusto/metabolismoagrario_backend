@@ -1,6 +1,7 @@
 import { CultivarsRepository } from '@db/repositories/cultivars.repository';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
+import { UpdateCultivarDto } from './dto/update-cultivar.dto';
 
 interface CreateCultivarRequest {
   name: string
@@ -19,4 +20,20 @@ export class CultivarsService {
     return await this.cultivarsRepository.findById(id)
   }
 
+  async update(cultivarId: string, updateCultivarDto: UpdateCultivarDto) {
+    try {
+      return await this.cultivarsRepository.update(cultivarId, updateCultivarDto)
+    } catch (error) {
+      throw new NotFoundException(error)
+    }
+  }
+
+  async remove(id: string) {
+    console.log(`Cultivar com id ${id} removida com sucesso`)
+    try {
+      return await this.cultivarsRepository.remove(id)
+    } catch (error) {
+      throw new NotFoundException(error)
+    }
+  }
 }
