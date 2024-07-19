@@ -8,7 +8,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
 
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || 3333;
   await app.listen(PORT, () => console.log(`Running on PORT: ${PORT} 🌱!`));
 }
 bootstrap();
