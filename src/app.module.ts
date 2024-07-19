@@ -15,7 +15,7 @@ import { BibliographicReferencesModule } from './modules/bibliographic-reference
     CropsModule, 
     CultivarsModule, 
     CultivarsConstantsModule, 
-    BibliographicReferencesModule  // Import the BibliographicReferencesModule
+    BibliographicReferencesModule  
   ],
   controllers: [],
   providers: [],

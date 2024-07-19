@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { UserRoles } from '@prisma/client';
 import { Role } from 'src/auth/decorators/user-role-decorator';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -6,7 +6,7 @@ import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   @Role(UserRoles.ADMIN)
@@ -18,5 +18,23 @@ export class UsersController {
   @Role(UserRoles.ADMIN)
   async findAll() {
     return await this.usersService.findAll();
+  }
+
+  @Get(':id')
+  @Role(UserRoles.ADMIN)
+  async findOne(@Param('id') id: string) {
+    return await this.usersService.findOne(id);
+  }
+
+  @Patch(':id')
+  @Role(UserRoles.ADMIN)
+  async update(@Param('id') id: string, @Body() updateUserDto: CreateUserDto) {
+    return await this.usersService.updateUser(id, updateUserDto);
+  }
+
+  @Delete(':id')
+  @Role(UserRoles.ADMIN)
+  async remove(@Param('id') id: string) {
+    return await this.usersService.deleteUser(id);
   }
 }
