@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, BibliographicReference } from '@prisma/client';
-import { PrismaService } from '@db/prisma.service';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class BibliographicReferencesService {

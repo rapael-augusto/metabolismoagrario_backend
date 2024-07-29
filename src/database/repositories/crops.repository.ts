@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma.service";
+import { PrismaService } from "../../prisma.service";
 import { UpdateCropDto } from "@modules/crops/dto/update-crop.dto";
 
 

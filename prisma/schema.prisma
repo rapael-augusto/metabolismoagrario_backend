@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // ou o provedor que você está usando
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -39,10 +39,12 @@ model Constant {
   country                  String?
   soil                     SoilTypes?
   cultivationSystem        CultivationSystem?
+  customSoilId             String?
+  customSoil               CustomSoilType?         @relation(fields: [customSoilId], references: [id])
   cultivarId               String
   cultivar                 Cultivar                @relation(fields: [cultivarId], references: [id])
   createdAt                DateTime                @default(now())
-  updatedAt                DateTime                @updatedAt
+  updatedAt                DateTime                @default(now())
   bibliographicReferenceId Int?
   bibliographicReference   BibliographicReference? @relation(fields: [bibliographicReferenceId], references: [id], name: "BibliographicReferenceConstants")
 }
@@ -53,7 +55,7 @@ model Crop {
   scientificName String
   cultivars      Cultivar[]
   createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  updatedAt      DateTime   @default(now())
 }
 
 model Cultivar {
@@ -63,7 +65,7 @@ model Cultivar {
   crop      Crop       @relation(fields: [cropId], references: [id])
   cropId    String
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  updatedAt DateTime   @default(now())
 }
 
 enum UserRoles {
@@ -92,6 +94,14 @@ enum SoilTypes {
   Clayey
   Sandy
   SandyClay
+}
+
+model CustomSoilType {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  constants Constant[]
 }
 
 enum ConstantTypes {
