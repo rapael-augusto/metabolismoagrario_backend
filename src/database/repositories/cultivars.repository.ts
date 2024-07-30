@@ -1,4 +1,4 @@
-import { PrismaService } from "@db/prisma.service"
+import { PrismaService } from "src/prisma.service"
 import { UpdateCultivarDto } from "@modules/cultivars/dto/update-cultivar.dto"
 import { Injectable, NotFoundException } from "@nestjs/common"
 

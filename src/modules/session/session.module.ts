@@ -1,4 +1,4 @@
-import { DatabaseModule } from "@db/prisma.module";
+import { DatabaseModule } from "src/prisma.module";
 import { Module } from "@nestjs/common";
 import { AuthModule } from "src/auth/auth.module";
 import { SessionController } from "./session-controller";

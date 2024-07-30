@@ -1,4 +1,4 @@
-import { DatabaseModule } from '@db/prisma.module';
+import { DatabaseModule } from 'src/prisma.module';
 import { Module } from '@nestjs/common';
 import { CultivarsController } from './cultivars.controller';
 import { CultivarsService } from './cultivars.service';

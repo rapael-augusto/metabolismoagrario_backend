@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma.service";
+import { PrismaService } from "../../prisma.service";
 import { ConstantTypes, CultivationSystem, IrrigationTypes, SoilTypes, } from "@prisma/client";
 import { BiomeTypes, ClimatesTypes } from "@/types/index";
 import { UpdateCultivarsConstantDto } from "@modules/cultivars-constants/dto/update-cultivars-constant.dto";

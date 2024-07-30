@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from '@db/prisma.module';
+import { DatabaseModule } from 'src/prisma.module';
 import { CultivarsConstantsController } from './cultivars-constants.controller';
 import { CultivarsConstantsService } from './cultivars-constants.service';
 

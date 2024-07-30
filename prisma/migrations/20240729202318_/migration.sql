@@ -14,7 +14,7 @@ CREATE TYPE "CultivationSystem" AS ENUM ('Conventional', 'Organic', 'Agroecologi
 CREATE TYPE "SoilTypes" AS ENUM ('Clayey', 'Sandy', 'SandyClay');
 
 -- CreateEnum
-CREATE TYPE "ConstantTypes" AS ENUM ('HARVEST_INDEX', 'AERIAL_RESIDUE_INDEX', '', 'PRODUCT_DRY_MATTER_FACTOR', 'RESIDUE_DRY_MATTER_FACTOR', 'BELOWGROUND_INDEX', 'WEED_AERIAL_FACTOR', 'WEED_BELOWGROUND_INDEX');
+CREATE TYPE "ConstantTypes" AS ENUM ('HARVEST_INDEX', 'AERIAL_RESIDUE_INDEX', 'PRODUCT_RESIDUE_INDEX', 'PRODUCT_DRY_MATTER_FACTOR', 'RESIDUE_DRY_MATTER_FACTOR', 'BELOWGROUND_INDEX', 'WEED_AERIAL_FACTOR', 'WEED_BELOWGROUND_INDEX');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -32,7 +32,7 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "BibliographicReference" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "authorName" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "year" INTEGER NOT NULL,
@@ -54,10 +54,11 @@ CREATE TABLE "Constant" (
     "country" TEXT,
     "soil" "SoilTypes",
     "cultivationSystem" "CultivationSystem",
+    "customSoilId" TEXT,
     "cultivarId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "bibliographicReferenceId" TEXT,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "bibliographicReferenceId" INTEGER,
 
     CONSTRAINT "Constant_pkey" PRIMARY KEY ("id")
 );
@@ -68,7 +69,7 @@ CREATE TABLE "Crop" (
     "name" TEXT NOT NULL,
     "scientificName" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Crop_pkey" PRIMARY KEY ("id")
 );
@@ -79,13 +80,29 @@ CREATE TABLE "Cultivar" (
     "name" TEXT NOT NULL,
     "cropId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Cultivar_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "CustomSoilType" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "CustomSoilType_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CustomSoilType_name_key" ON "CustomSoilType"("name");
+
+-- AddForeignKey
+ALTER TABLE "Constant" ADD CONSTRAINT "Constant_customSoilId_fkey" FOREIGN KEY ("customSoilId") REFERENCES "CustomSoilType"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Constant" ADD CONSTRAINT "Constant_cultivarId_fkey" FOREIGN KEY ("cultivarId") REFERENCES "Cultivar"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
