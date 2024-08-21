@@ -1,19 +1,5 @@
-import { IsOptional, IsString, IsInt } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateBibliographicReferenceDto } from './create-bibliographic-references.dto.ts';
 
-export class ReviewBibliographicReferenceDto {
-  @IsString()
-  @IsOptional()
-  authorName?: string;
-
-  @IsString()
-  @IsOptional()
-  title?: string;
-
-  @IsInt()
-  @IsOptional()
-  year?: number;
-
-  @IsString()
-  @IsOptional()
-  source?: string;
+export class ReviewBibliographicReferenceDto extends PartialType(CreateBibliographicReferenceDto) {
 }

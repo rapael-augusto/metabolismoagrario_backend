@@ -1,14 +1,8 @@
-import { IsString, IsInt } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateBibliographicReferenceDto {
   @IsString()
-  authorName: string;
-
-  @IsString()
-  title: string;
-
-  @IsInt()
-  year: number;
+  link: string;
 
   @IsString()
   source: string;
