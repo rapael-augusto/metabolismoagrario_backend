@@ -19,24 +19,49 @@ model User {
 }
 
 model BibliographicReference {
-  id         Int        @id @default(autoincrement())
-  authorName String
-  title      String
-  year       Int
-  source     String
-  constants  Constant[] @relation("BibliographicReferenceConstants")
+  id        Int        @id @default(autoincrement())
+  link      String
+  source    String
+  constants Constant[] @relation("BibliographicReferenceConstants")
+}
+
+model Country {
+  id            String     @id @default(uuid())
+  gentilico     String
+  nome_pais     String     @unique
+  nome_pais_int String
+  sigla         String
+  constants     Constant[] @relation("CountryConstants")
+}
+
+model CustomSoilType {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  constants Constant[]
+}
+
+model CustomBiomeType {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  constants Constant[]
 }
 
 model Constant {
   id                       String                  @id @default(uuid())
   value                    Float
-  reference                String
   type                     ConstantTypes
   comment                  String?
   climate                  String?
   biome                    String?
+  customBiomeId            String?
+  customBiome              CustomBiomeType?        @relation(fields: [customBiomeId], references: [id])
   irrigation               IrrigationTypes?
-  country                  String?
+  countryId                String
+  country                  Country                 @relation(fields: [countryId], references: [id], name: "CountryConstants")
   soil                     SoilTypes?
   cultivationSystem        CultivationSystem?
   customSoilId             String?
@@ -94,14 +119,7 @@ enum SoilTypes {
   Clayey
   Sandy
   SandyClay
-}
-
-model CustomSoilType {
-  id        String     @id @default(uuid())
-  name      String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @default(now())
-  constants Constant[]
+  Other
 }
 
 enum ConstantTypes {
