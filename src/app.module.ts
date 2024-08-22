@@ -9,6 +9,7 @@ import { BibliographicReferencesModule } from './modules/bibliographic-reference
 import { DatabaseModule } from './prisma.module';  // Corrigir o nome da importação
 import { CustomBiomeModule } from '@modules/biome/custom-biome.module';
 import { CustomSoilModule } from '@modules/soil/custom-soil.module';
+import { CountriesController } from '@modules/country/country.controller';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { CustomSoilModule } from '@modules/soil/custom-soil.module';
     DatabaseModule,  // Usar o nome correto do módulo
   ],
   controllers: [
-    
+    CountriesController
   ],
   providers: [],
 })
