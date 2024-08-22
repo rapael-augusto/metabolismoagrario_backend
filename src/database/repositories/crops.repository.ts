@@ -14,10 +14,7 @@ export class CropsRepository {
   constructor(private prisma: PrismaService) { }
 
   async create(data: CreateCropData) {
-    const crops = await this.prisma.crop.create({
-      data,
-    })
-
+    const crops = await this.prisma.crop.create({ data })
     return crops
   }
 
@@ -47,7 +44,7 @@ export class CropsRepository {
     try {
       return await this.prisma.crop.delete({ where: { id } })
     } catch (error) {
-      throw new NotFoundException(`Cultura com ${id} não existe`)
+      throw new NotFoundException(`Cultura com id: ${id} não existe`)
     }
   }
 }

@@ -28,4 +28,5 @@ export enum BiomeTypes {
   "Tundra" = "Tundra",
   "Floresta Mediterrânea" = "Floresta Mediterrânea",
   "Biomas de Montanha" = "Biomas de Montanha",
+  "Outro" = "Outro"
 }

@@ -14,19 +14,19 @@ export class CropsController {
   @Post()
   @Role(UserRoles.ADMIN)
   async create(@Body() createCropDto: CreateCropDto) {
-    return await this.cropsService.create({ ...createCropDto });
+    return await this.cropsService.create({ ...createCropDto })
   }
 
   @PublicRoute()
   @Get()
   async findAll() {
-    return await this.cropsService.findAll();
+    return await this.cropsService.findAll()
   }
 
   @PublicRoute()
   @Get(":id")
   async findOne(@Param("id") id: string) {
-    return await this.cropsService.findOne(id);
+    return await this.cropsService.findOne(id)
   }
 
   @Patch(':id')
@@ -41,7 +41,7 @@ export class CropsController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     try {
-      return await this.cropsService.remove(id);
+      return await this.cropsService.remove(id)
     } catch (error) {
       throw new NotFoundException(`Cultura com id ${id} não existe`)
     }

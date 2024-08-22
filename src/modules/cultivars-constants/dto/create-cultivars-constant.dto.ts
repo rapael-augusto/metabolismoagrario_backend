@@ -6,9 +6,6 @@ export class CreateCultivarConstantDto {
   @IsNumber()
   value: number;
 
-  @IsString()
-  reference: string;
-
   @IsEnum(ConstantTypes)
   type: ConstantTypes;
 
@@ -38,4 +35,16 @@ export class CreateCultivarConstantDto {
   @IsOptional()
   @IsEnum(SoilTypes)
   soil?: SoilTypes
+
+  @IsOptional()
+  @IsString()
+  customSoil?: string
+
+  @IsOptional()
+  @IsString()
+  customBiome?: string
+
+  @IsOptional()
+  @IsNumber()
+  bibliographicReference: number
 }
