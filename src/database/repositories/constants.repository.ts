@@ -18,7 +18,7 @@ interface CreateConstantDto {
   customBiome?: string
   soil?: SoilTypes
   cultivarId: string
-  bibliographicReference?: number
+  linkReference: string
 }
 
 @Injectable()
@@ -26,10 +26,9 @@ export class ConstantsRepository {
   constructor(private prisma: PrismaService) { }
 
   async create(data: CreateConstantDto) {
-    const { country, cultivarId, bibliographicReference, customSoil, customBiome, ...rest } = data
+    const { country, cultivarId, customSoil, customBiome, ...rest } = data
     // related entities
     let countryRecord = null
-    let bibliographicReferenceRecord = null
     let customSoilRecord = null
     let customBiomeRecord = null
 
@@ -39,14 +38,6 @@ export class ConstantsRepository {
 
     if (country && !countryRecord) {
       throw new NotFoundException(`Country with name ${country} not found`)
-    }
-
-    if (bibliographicReference) {
-      bibliographicReferenceRecord = await this.prisma.bibliographicReference.findUnique({ where: { id: bibliographicReference } })
-      
-      if (!bibliographicReferenceRecord) {
-        throw new NotFoundException(`BibliographicReference with id ${bibliographicReference} not found`)
-      }
     }
 
     if (customSoil) {
@@ -69,7 +60,6 @@ export class ConstantsRepository {
       ...rest,
       country: countryRecord ? { connect: { id: countryRecord.id } } : undefined,
       cultivar: { connect: { id: cultivarId } },
-      bibliographicReference: bibliographicReferenceRecord ? { connect: { id: bibliographicReferenceRecord.id } } : undefined,
       customSoil: customSoilRecord ? { connect: { id: customSoilRecord.id } } : undefined,
       customBiome: customBiomeRecord ? { connect: { id: customBiomeRecord.id } } : undefined,
     }
@@ -78,18 +68,12 @@ export class ConstantsRepository {
   }
   
   async update(id: string, data: UpdateCultivarsConstantDto) {
-    const { country, bibliographicReference, customSoil, customBiome, ...rest } = data
+    const { country, customSoil, customBiome, ...rest } = data
 
     const countryRecord = country ? await this.prisma.country.findUnique({ where: { nome_pais: country } }) : null
 
     if (country && !countryRecord) {
       throw new NotFoundException(`Country with name ${country} not found`)
-    }
-
-    const bibliographicReferenceRecord = bibliographicReference ? await this.prisma.bibliographicReference.findUnique({ where: { id: bibliographicReference } }) : null
-
-    if (bibliographicReference && !bibliographicReferenceRecord) {
-      throw new NotFoundException(`BibliographicReference with id ${bibliographicReference} not found`)
     }
 
     const customSoilRecord = customSoil ? await this.prisma.customSoilType.findUnique({ where: { id: customSoil } }) : null
@@ -107,9 +91,6 @@ export class ConstantsRepository {
     const updateData: any = {
       ...rest,
       ...(countryRecord && { country: { connect: { id: countryRecord.id } } }),
-      ...(bibliographicReferenceRecord && {
-        bibliographicReference: { connect: { id: bibliographicReferenceRecord.id } },
-      }),
       ...(customSoilRecord && { customSoil: { connect: { id: customSoilRecord.id } } }),
       ...(customBiomeRecord && { customBiome: { connect: { id: customBiomeRecord.id } } })
     }

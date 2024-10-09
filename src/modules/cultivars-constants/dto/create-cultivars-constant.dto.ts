@@ -44,7 +44,6 @@ export class CreateCultivarConstantDto {
   @IsString()
   customBiome?: string
 
-  @IsOptional()
-  @IsNumber()
-  bibliographicReference: number
+  @IsString()
+  linkReference: string
 }
