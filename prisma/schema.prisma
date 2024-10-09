@@ -18,13 +18,6 @@ model User {
   updatedAt    DateTime  @updatedAt
 }
 
-model BibliographicReference {
-  id        Int        @id @default(autoincrement())
-  link      String
-  source    String
-  constants Constant[] @relation("BibliographicReferenceConstants")
-}
-
 model Country {
   id            String     @id @default(uuid())
   gentilico     String
@@ -51,27 +44,26 @@ model CustomBiomeType {
 }
 
 model Constant {
-  id                       String                  @id @default(uuid())
-  value                    Float
-  type                     ConstantTypes
-  comment                  String?
-  climate                  String?
-  biome                    String?
-  customBiomeId            String?
-  customBiome              CustomBiomeType?        @relation(fields: [customBiomeId], references: [id])
-  irrigation               IrrigationTypes?
-  countryId                String
-  country                  Country                 @relation(fields: [countryId], references: [id], name: "CountryConstants")
-  soil                     SoilTypes?
-  cultivationSystem        CultivationSystem?
-  customSoilId             String?
-  customSoil               CustomSoilType?         @relation(fields: [customSoilId], references: [id])
-  cultivarId               String
-  cultivar                 Cultivar                @relation(fields: [cultivarId], references: [id])
-  createdAt                DateTime                @default(now())
-  updatedAt                DateTime                @default(now())
-  bibliographicReferenceId Int?
-  bibliographicReference   BibliographicReference? @relation(fields: [bibliographicReferenceId], references: [id], name: "BibliographicReferenceConstants")
+  id                String             @id @default(uuid())
+  value             Float
+  type              ConstantTypes
+  comment           String?
+  climate           String?
+  biome             String?
+  customBiomeId     String?
+  customBiome       CustomBiomeType?   @relation(fields: [customBiomeId], references: [id])
+  irrigation        IrrigationTypes?
+  countryId         String
+  country           Country            @relation(fields: [countryId], references: [id], name: "CountryConstants")
+  soil              SoilTypes?
+  cultivationSystem CultivationSystem?
+  customSoilId      String?
+  customSoil        CustomSoilType?    @relation(fields: [customSoilId], references: [id])
+  cultivarId        String
+  cultivar          Cultivar           @relation(fields: [cultivarId], references: [id])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now())
+  linkReference     String             @default("")
 }
 
 model Crop {
