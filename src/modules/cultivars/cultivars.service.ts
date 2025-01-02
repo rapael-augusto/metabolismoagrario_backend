@@ -1,39 +1,55 @@
 import { CultivarsRepository } from '@db/repositories/cultivars.repository';
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UpdateCultivarDto } from './dto/update-cultivar.dto';
-
-interface CreateCultivarRequest {
-  name: string
-  cropId: string
-}
+import { CreateCultivarDto } from './dto/create-cultivar.dto';
+import { ReviewStatus, User } from '@prisma/client';
 
 @Injectable()
 export class CultivarsService {
-  constructor(private cultivarsRepository: CultivarsRepository) { }
+  constructor(private cultivarsRepository: CultivarsRepository) {}
 
-  async create(request: CreateCultivarRequest) {
-    return await this.cultivarsRepository.create({ id: randomUUID(), ...request })
+  async create(cropId: string, request: CreateCultivarDto) {
+    try {
+      const { name, status } = request;
+      return await this.cultivarsRepository.create({ name, cropId, status });
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   async findOne(id: string) {
-    return await this.cultivarsRepository.findById(id)
+    return await this.cultivarsRepository.findById(id);
   }
 
-  async update(cultivarId: string, updateCultivarDto: UpdateCultivarDto) {
+  async update(
+    cultivarId: string,
+    updateCultivarDto: UpdateCultivarDto,
+    user: User,
+  ) {
     try {
-      return await this.cultivarsRepository.update(cultivarId, updateCultivarDto)
+      if (updateCultivarDto.status && user.role !== 'ADMIN')
+        throw new ConflictException("You can't change the status!");
+
+      return await this.cultivarsRepository.update(
+        cultivarId,
+        updateCultivarDto,
+      );
     } catch (error) {
-      throw new NotFoundException(error)
+      throw new NotFoundException(error);
     }
   }
 
   async remove(id: string) {
-    console.log(`Cultivar com id ${id} removida com sucesso`)
+    console.log(`Cultivar com id ${id} removida com sucesso`);
     try {
-      return await this.cultivarsRepository.remove(id)
+      return await this.cultivarsRepository.remove(id);
     } catch (error) {
-      throw new NotFoundException(error)
+      throw new NotFoundException(error);
     }
   }
 }

@@ -1,18 +1,27 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserRepository } from 'src/database/repositories/user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { randomUUID } from 'node:crypto';
-import { hash as bcryptHash } from 'bcrypt';
-import { User, Prisma } from '@prisma/client';
+import { hash as bcryptHash, compare } from 'bcrypt';
+import { User } from '@prisma/client';
+import { UpdateUserDto } from './dto/update-user-dto';
+import { UserResponseDto } from './dto/user-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UsersService {
   constructor(private userRepository: UserRepository) {}
 
   async create(createUserDto: CreateUserDto) {
-    const userExists = await this.userRepository.findByEmail(createUserDto.email);
+    const userExists = await this.userRepository.findByEmail(
+      createUserDto.email,
+    );
     if (userExists) {
-      throw new BadRequestException('User already exists');
+      throw new ConflictException('User already exists');
     }
 
     const hashedPassword = await bcryptHash(createUserDto.password, 8);
@@ -34,15 +43,50 @@ export class UsersService {
   }
 
   async findAll() {
-    return (await this.userRepository.list()).map(user => ({ ...user, password: undefined, refreshToken: undefined }));
+    return (await this.userRepository.list()).map((user) => ({
+      ...user,
+      password: undefined,
+      refreshToken: undefined,
+    }));
   }
 
-  async findOne(id: string): Promise<User | null> {
-    return this.userRepository.findById(id);
+  async findOne(id: string): Promise<UserResponseDto | null> {
+    const user = await this.userRepository.findById(id);
+    if (!user) throw new NotFoundException('User not found.');
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 
-  async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User> {
-    return this.userRepository.update(id, data);
+  async updateUser(id: string, data: UpdateUserDto): Promise<UserResponseDto> {
+    console.log(data);
+    const { email, password, oldPassword } = data;
+    const user = await this.userRepository.findById(id);
+
+    if (!user) throw new NotFoundException('User not found.');
+
+    if (email && email !== user.email) {
+      const emailInUse = await this.userRepository.findByEmail(email);
+      if (emailInUse) {
+        throw new ConflictException('User already exists with this email.');
+      }
+    }
+
+    if (oldPassword && password) {
+      const passwordMatch = await compare(oldPassword, user.password);
+      if (!passwordMatch) {
+        throw new ConflictException('Old password does not match.');
+      }
+      data.password = await bcryptHash(password, 8);
+    }
+
+    delete data.oldPassword;
+
+    const userData = await this.userRepository.update(id, data);
+
+    return plainToInstance(UserResponseDto, userData, {
+      excludeExtraneousValues: true,
+    });
   }
 
   async deleteUser(id: string): Promise<User> {

@@ -1,8 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { UserRoles } from '@prisma/client';
 import { Role } from 'src/auth/decorators/user-role-decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
+import { UpdateUserDto } from './dto/update-user-dto';
 
 @Controller('users')
 export class UsersController {
@@ -28,7 +37,7 @@ export class UsersController {
 
   @Patch(':id')
   @Role(UserRoles.ADMIN)
-  async update(@Param('id') id: string, @Body() updateUserDto: CreateUserDto) {
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return await this.usersService.updateUser(id, updateUserDto);
   }
 

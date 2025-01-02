@@ -79,6 +79,7 @@ CREATE TABLE "Cultivar" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "cropId" TEXT NOT NULL,
+    "status" "ReviewStatus" NOT NULL DEFAULT 'Pending',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
