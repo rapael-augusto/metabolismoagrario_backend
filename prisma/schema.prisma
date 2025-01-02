@@ -8,14 +8,15 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  name         String
-  email        String    @unique
-  password     String
-  role         UserRoles
-  refreshToken String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                 String               @id @default(uuid())
+  name               String
+  email              String               @unique
+  password           String
+  role               UserRoles
+  refreshToken       String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  PasswordResetToken PasswordResetToken[]
 }
 
 model Country {
@@ -31,7 +32,7 @@ model CustomSoilType {
   id        String     @id @default(uuid())
   name      String     @unique
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   constants Constant[]
 }
 
@@ -39,7 +40,7 @@ model CustomBiomeType {
   id        String     @id @default(uuid())
   name      String     @unique
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   constants Constant[]
 }
 
@@ -51,18 +52,18 @@ model Constant {
   climate           String?
   biome             String?
   customBiomeId     String?
-  customBiome       CustomBiomeType?   @relation(fields: [customBiomeId], references: [id])
+  customBiome       CustomBiomeType?   @relation(fields: [customBiomeId], references: [id], onDelete: SetNull)
   irrigation        IrrigationTypes?
   countryId         String
   country           Country            @relation(fields: [countryId], references: [id], name: "CountryConstants")
   soil              SoilTypes?
   cultivationSystem CultivationSystem?
   customSoilId      String?
-  customSoil        CustomSoilType?    @relation(fields: [customSoilId], references: [id])
+  customSoil        CustomSoilType?    @relation(fields: [customSoilId], references: [id], onDelete: SetNull)
   cultivarId        String
-  cultivar          Cultivar           @relation(fields: [cultivarId], references: [id])
+  cultivar          Cultivar           @relation(fields: [cultivarId], references: [id], onDelete: Cascade)
   createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
   linkReference     String             @default("")
 }
 
@@ -72,17 +73,28 @@ model Crop {
   scientificName String
   cultivars      Cultivar[]
   createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 }
 
 model Cultivar {
-  id        String     @id @default(uuid())
+  id        String       @id @default(uuid())
   name      String
   constants Constant[]
-  crop      Crop       @relation(fields: [cropId], references: [id])
+  status    ReviewStatus @default(Pending)
+  crop      Crop         @relation(fields: [cropId], references: [id], onDelete: Cascade)
   cropId    String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @default(now())
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model PasswordResetToken {
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  token     String  @unique
+  createdAt DateTime @default(now())
+
+  @@id([userId])
+  @@map("PasswordResetTokens")
 }
 
 enum UserRoles {

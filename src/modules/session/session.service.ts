@@ -1,12 +1,19 @@
 import { UserRepository } from 'src/database/repositories/user.repository';
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare as bcryptCompare, hash as bcryptHash } from 'bcrypt';
 import { generateAccessTokens } from 'src/auth/utils/generate-access-tokens';
 
 @Injectable()
 export class SessionService {
-  constructor(private userRepository: UserRepository, private encrypter: JwtService) {}
+  constructor(
+    private userRepository: UserRepository,
+    private encrypter: JwtService,
+  ) {}
 
   async authenticateUser(request: { email: string; password: string }) {
     const user = await this.userRepository.findByEmail(request.email);
@@ -15,14 +22,19 @@ export class SessionService {
       throw new NotFoundException('User not found');
     }
 
-    const isPasswordValid = await bcryptCompare(request.password, user.password!);
+    const isPasswordValid = await bcryptCompare(
+      request.password,
+      user.password,
+    );
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
 
-    const { accessToken, refreshToken } = await generateAccessTokens(user, this.encrypter);
-
+    const { accessToken, refreshToken } = await generateAccessTokens(
+      user,
+      this.encrypter,
+    );
 
     const hashedRefreshToken = await bcryptHash(refreshToken, 8);
     await this.userRepository.updateRefreshToken(hashedRefreshToken, user.id);
@@ -46,7 +58,10 @@ export class SessionService {
       throw new UnauthorizedException('Access denied');
     }
 
-    const isRefreshTokenValid = await bcryptCompare(request.refreshToken, user.refreshToken);
+    const isRefreshTokenValid = await bcryptCompare(
+      request.refreshToken,
+      user.refreshToken,
+    );
 
     if (!isRefreshTokenValid) {
       throw new UnauthorizedException('Access denied');
