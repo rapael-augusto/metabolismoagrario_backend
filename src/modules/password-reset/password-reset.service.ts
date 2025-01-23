@@ -58,7 +58,8 @@ export class PasswordResetService {
     const existingToken = await this.passwordResetRepository.findByToken(token);
     if (!existingToken) throw new NotFoundException('Reset token not found!');
     // Se o token estiver expirado, deleta ele do banco
-    if (await this.isTokenExpired(existingToken.createdAt)) {
+    const isExpired = await this.isTokenExpired(existingToken.createdAt);
+    if (isExpired) {
       await this.passwordResetRepository.delete(existingToken.userId);
       throw new ConflictException('Reset token is expired!');
     }

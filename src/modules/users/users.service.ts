@@ -17,6 +17,8 @@ export class UsersService {
   constructor(private userRepository: UserRepository) {}
 
   async create(createUserDto: CreateUserDto) {
+    try {
+    } catch (error) {}
     const userExists = await this.userRepository.findByEmail(
       createUserDto.email,
     );

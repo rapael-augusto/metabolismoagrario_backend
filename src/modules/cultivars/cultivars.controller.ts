@@ -21,12 +21,16 @@ export class CultivarsController {
   constructor(private readonly cultivarsService: CultivarsService) {}
 
   @Post(':cropId')
-  @Role(UserRoles.ADMIN)
   async create(
     @Param('cropId') cropId: string,
     @Body() createCultivarDto: CreateCultivarDto,
+    @CurrentUser() user: User,
   ) {
-    return await this.cultivarsService.create(cropId, { ...createCultivarDto });
+    return await this.cultivarsService.create(
+      cropId,
+      { ...createCultivarDto },
+      user,
+    );
   }
 
   @PublicRoute()
