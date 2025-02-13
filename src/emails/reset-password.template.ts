@@ -126,7 +126,7 @@ export const resetPasswordMail = (token: string) => `
             <p>Foi solicitado recentemente um link para redifinir sua senha, se não foi você desconsidere esse email.</p>
             <p>Segue o link abaixo no botão para redefinir a senha</p>
             <div class="button-container">
-                <a href="${process.env.APP_URL}/password-reset/${token}" class="btn" style="color: black;">
+                <a href="${process.env.APP_URL}/forgotPassword/${token}" class="btn" style="color: black;">
                     Redefinir a senha
                 </a>
             </div>

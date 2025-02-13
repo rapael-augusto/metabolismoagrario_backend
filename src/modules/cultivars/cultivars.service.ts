@@ -7,15 +7,16 @@ import {
 } from '@nestjs/common';
 import { UpdateCultivarDto } from './dto/update-cultivar.dto';
 import { CreateCultivarDto } from './dto/create-cultivar.dto';
-import { ReviewStatus, User } from '@prisma/client';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class CultivarsService {
   constructor(private cultivarsRepository: CultivarsRepository) {}
 
-  async create(cropId: string, request: CreateCultivarDto) {
+  async create(cropId: string, request: CreateCultivarDto, user: User) {
     try {
-      const { name, status } = request;
+      const { name } = request;
+      const status = user.role === 'ADMIN' ? 'Approved' : 'Pending';
       return await this.cultivarsRepository.create({ name, cropId, status });
     } catch (error) {
       throw new BadRequestException(error);
