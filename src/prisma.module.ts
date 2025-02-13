@@ -5,6 +5,7 @@ import { CropsRepository } from './database/repositories/crops.repository';
 import { ConstantsRepository } from './database/repositories/constants.repository';
 import { CultivarsRepository } from './database/repositories/cultivars.repository';
 import { PasswordResetRepository } from '@db/repositories/password-reset.repository';
+import { CultivarReviewRepository } from '@db/repositories/cultivarReview.repository';
 
 @Module({
   providers: [
@@ -14,6 +15,7 @@ import { PasswordResetRepository } from '@db/repositories/password-reset.reposit
     CultivarsRepository,
     ConstantsRepository,
     PasswordResetRepository,
+    CultivarReviewRepository,
   ],
   exports: [
     PrismaService,
@@ -22,6 +24,7 @@ import { PasswordResetRepository } from '@db/repositories/password-reset.reposit
     CultivarsRepository,
     ConstantsRepository,
     PasswordResetRepository,
+    CultivarReviewRepository,
   ],
 })
 export class DatabaseModule {}
