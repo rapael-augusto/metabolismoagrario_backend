@@ -17,6 +17,7 @@ model User {
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   PasswordResetToken PasswordResetToken[]
+  cultivarReviews    CultivarReview[]
 }
 
 model Country {
@@ -80,11 +81,11 @@ model Cultivar {
   id        String       @id @default(uuid())
   name      String
   constants Constant[]
-  status    ReviewStatus @default(Pending)
   crop      Crop         @relation(fields: [cropId], references: [id], onDelete: Cascade)
   cropId    String
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
+  reviews CultivarReview[]
 }
 
 model PasswordResetToken {
@@ -95,6 +96,18 @@ model PasswordResetToken {
 
   @@id([userId])
   @@map("PasswordResetTokens")
+}
+
+model CultivarReview {
+  id             String       @id @default(uuid())
+  justification  String?
+  Cultivar       Cultivar     @relation(fields: [cultivarId], references: [id], onDelete: Cascade)
+  requestedBy    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status         ReviewStatus @default(Pending)
+  userId         String       
+  cultivarId     String        
+  createdAt      DateTime     @default(now())
+  reviewed_at    DateTime?
 }
 
 enum UserRoles {
