@@ -1,9 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import { CreateCultivarReviewDto } from './create-cultivar-review.dto';
 
-export class UpdateCultivarReviewDto {
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  @Length(3)
-  Justification?: string;
-}
+export class UpdateCultivarReviewDto
+  implements Partial<CreateCultivarReviewDto> {}

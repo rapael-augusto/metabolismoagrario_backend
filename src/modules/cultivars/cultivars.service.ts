@@ -56,11 +56,7 @@ export class CultivarsService {
     const { id: userId } = user;
     const { id: cultivarId } = await this.create(cropId, data);
     try {
-      return await this.cultivarsReviewRepository.create({
-        id: randomUUID(),
-        userId,
-        cultivarId,
-      });
+      return;
     } catch (error) {
       throw new BadRequestException(error);
     }

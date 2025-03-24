@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCultivarReviewDto } from '@modules/cultivars/dto/create-cultivar-review.dto';
 import { UpdateCultivarReviewDto } from '@modules/cultivars/dto/update-cultivar-review.dto';
+import { JudgeCultivarReviewDTO } from '@modules/cultivars/dto/judge-cultivar-review.dto';
 
 @Injectable()
 export class CultivarReviewRepository {
@@ -38,9 +39,22 @@ export class CultivarReviewRepository {
     });
   }
 
-  async update(
+  async update(id: string, data: UpdateCultivarReviewDto) {
+    try {
+      return this.prisma.cultivarReview.update({
+        data,
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new error();
+    }
+  }
+
+  async judge(
     id: string,
-    data: UpdateCultivarReviewDto & { reviewed_at: Date },
+    data: JudgeCultivarReviewDTO & { reviewed_at: Date },
   ) {
     try {
       return this.prisma.cultivarReview.update({

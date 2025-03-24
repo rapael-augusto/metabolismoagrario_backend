@@ -12,12 +12,7 @@ export class CreateCultivarReviewDto {
   cultivarId: string;
 
   @IsString()
-  @IsOptional()
-  justification?: string;
-
-  @IsOptional()
-  @IsDate()
-  reviewedAt?: Date;
+  referenceId: string;
 
   @IsOptional()
   @IsDate()
