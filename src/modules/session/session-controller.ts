@@ -12,7 +12,8 @@ export class SessionController {
   @PublicRoute()
   @Post()
   async login(@Body() body: any) {
-    const { user, accessToken, refreshToken } = await this.sessionService.authenticateUser(body);
+    const { user, accessToken, refreshToken } =
+      await this.sessionService.authenticateUser(body);
 
     return { user, accessToken, refreshToken };
   }
@@ -22,11 +23,14 @@ export class SessionController {
     await this.sessionService.signOutUser(id);
   }
 
-  @PublicRoute() 
+  @PublicRoute()
   @UseGuards(RefreshJwtGuard)
   @Post('/refresh-token')
   async refreshToken(@CurrentUser() user: User) {
-    const tokens = await this.sessionService.refreshAccessToken({ userId: user.id, refreshToken: user.refreshToken! });
+    const tokens = await this.sessionService.refreshAccessToken({
+      userId: user.id,
+      refreshToken: user.refreshToken!,
+    });
 
     return tokens;
   }

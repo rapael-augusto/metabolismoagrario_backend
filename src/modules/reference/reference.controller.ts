@@ -1,13 +1,19 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Param, Post } from '@nestjs/common';
 import { ReferenceService } from './reference.service';
-import { CreateReferenceDTO } from './dto/create-reference.dto';
+import { CreateFullReferenceDTO } from './dto/create-full-reference.dto';
+import { CurrentUser } from 'src/auth/decorators/current-user-decorator';
+import { User } from '@prisma/client';
 
 @Controller('references')
 export class ReferenceController {
   constructor(private readonly referenceService: ReferenceService) {}
 
-  @Post()
-  async create(@Body() data: CreateReferenceDTO) {
-    return this.referenceService.create(data);
+  @Post(':cultivarId')
+  async create(
+    @Param('cultivarId') cultivarId: string,
+    @Body() data: CreateFullReferenceDTO,
+    @CurrentUser() user: User,
+  ) {
+    return this.referenceService.create(cultivarId, data, user);
   }
 }

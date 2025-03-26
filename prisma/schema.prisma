@@ -42,6 +42,8 @@ model Constant {
   updatedAt         DateTime           @updatedAt
   referenceId       String
   reference         Reference          @relation(fields: [referenceId], references: [id], onDelete: Cascade)
+
+  @@unique([referenceId, environmentId, cultivarId, type])
 }
 
 model Environment {

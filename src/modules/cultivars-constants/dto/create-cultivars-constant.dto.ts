@@ -1,10 +1,4 @@
-import { BiomeTypes, ClimatesTypes } from '@/types/index';
-import {
-  ConstantTypes,
-  CultivationSystem,
-  IrrigationTypes,
-  SoilTypes,
-} from '@prisma/client';
+import { ConstantTypes } from '@prisma/client';
 import {
   IsEnum,
   IsNotEmpty,
@@ -15,9 +9,11 @@ import {
 
 export class CreateCultivarConstantDto {
   @IsNumber()
+  @IsNotEmpty()
   value: number;
 
   @IsEnum(ConstantTypes)
+  @IsNotEmpty()
   type: ConstantTypes;
 
   @IsOptional()

@@ -16,7 +16,25 @@ export class CultivarsRepository {
 
   async findById(id: string) {
     const cultivar = await this.prisma.cultivar.findUnique({
-      where: { id },
+      where: {
+        id,
+        OR: [
+          {
+            cultivarReferences: {
+              some: {
+                reference: {
+                  cultivarReviews: { every: { status: 'Approved' } },
+                },
+              },
+            },
+          },
+          {
+            cultivarReferences: {
+              none: {},
+            },
+          },
+        ],
+      },
       include: {
         cultivarReferences: {
           include: {
