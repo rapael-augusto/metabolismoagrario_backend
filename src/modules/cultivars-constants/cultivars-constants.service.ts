@@ -1,33 +1,71 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCultivarConstantDto } from './dto/create-cultivars-constant.dto';
 import { ConstantsRepository } from '@db/repositories/constants.repository';
-import { randomUUID } from 'node:crypto';
 import { UpdateCultivarsConstantDto } from './dto/update-cultivars-constant.dto';
+import { ReferenceRepository } from '@db/repositories/reference.repository';
+import { EnvironmentRepository } from '@db/repositories/environment.repository';
+import { CreateManyCultivarConstantsDTO } from './dto/create-many-cultivars-constants.dto';
 
 @Injectable()
 export class CultivarsConstantsService {
-  constructor(private cultivarsConstantsRepository: ConstantsRepository) { }
+  constructor(
+    private cultivarsConstantsRepository: ConstantsRepository,
+    private readonly referenceRepository: ReferenceRepository,
+    private readonly environmentRepository: EnvironmentRepository,
+  ) {}
 
-  async create(cultivarId: string, createCultivarsConstantDto: CreateCultivarConstantDto) {
-    return await this.cultivarsConstantsRepository.create({ id: randomUUID(), cultivarId, ...createCultivarsConstantDto, })
+  async create(
+    cultivarId: string,
+    createCultivarsConstantDto: CreateCultivarConstantDto,
+  ) {
+    return await this.cultivarsConstantsRepository.create({
+      cultivarId,
+      ...createCultivarsConstantDto,
+    });
   }
 
-  
-  async update(cultivarId: string, updateCultivarsConstantDto: UpdateCultivarsConstantDto) {
+  async createMany(cultivarId: string, data: CreateManyCultivarConstantsDTO) {
     try {
-      return await this.cultivarsConstantsRepository.update(cultivarId, updateCultivarsConstantDto)
+      const { referenceId, environmentId } = data;
+      const referenceStored = this.referenceRepository.findById(referenceId);
+      if (!referenceStored) throw new NotFoundException('Reference not found');
+
+      const environmentStored =
+        this.environmentRepository.findById(environmentId);
+
+      if (!environmentStored)
+        throw new NotFoundException('Environment not found');
+
+      return this.cultivarsConstantsRepository.createMany(data, cultivarId);
     } catch (error) {
-      throw new NotFoundException(error)
+      throw new BadRequestException(error);
     }
   }
-  
+
+  async update(
+    cultivarId: string,
+    updateCultivarsConstantDto: UpdateCultivarsConstantDto,
+  ) {
+    try {
+      return await this.cultivarsConstantsRepository.update(
+        cultivarId,
+        updateCultivarsConstantDto,
+      );
+    } catch (error) {
+      throw new NotFoundException(error);
+    }
+  }
+
   async remove(id: string) {
-    console.log(`Fator de conversão ${id} removido com sucesso`)
+    console.log(`Fator de conversão ${id} removido com sucesso`);
     try {
-      return await this.cultivarsConstantsRepository.remove(id)
+      return await this.cultivarsConstantsRepository.remove(id);
     } catch (error) {
-      throw new NotFoundException(error)
+      throw new NotFoundException(error);
     }
   }
-
 }

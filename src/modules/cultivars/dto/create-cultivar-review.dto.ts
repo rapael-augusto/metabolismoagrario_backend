@@ -1,10 +1,6 @@
-import { IsDate, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsDate, IsOptional, IsString } from 'class-validator';
 
 export class CreateCultivarReviewDto {
-  @IsUUID()
-  @IsString()
-  id: string;
-
   @IsString()
   userId: string;
 
@@ -12,12 +8,7 @@ export class CreateCultivarReviewDto {
   cultivarId: string;
 
   @IsString()
-  @IsOptional()
-  justification?: string;
-
-  @IsOptional()
-  @IsDate()
-  reviewedAt?: Date;
+  referenceId: string;
 
   @IsOptional()
   @IsDate()

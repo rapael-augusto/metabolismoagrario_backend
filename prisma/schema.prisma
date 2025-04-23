@@ -26,23 +26,7 @@ model Country {
   nome_pais     String     @unique
   nome_pais_int String
   sigla         String
-  constants     Constant[] @relation("CountryConstants")
-}
-
-model CustomSoilType {
-  id        String     @id @default(uuid())
-  name      String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  constants Constant[]
-}
-
-model CustomBiomeType {
-  id        String     @id @default(uuid())
-  name      String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  constants Constant[]
+  environments   Environment[]
 }
 
 model Constant {
@@ -50,22 +34,43 @@ model Constant {
   value             Float
   type              ConstantTypes
   comment           String?
-  climate           String?
-  biome             String?
-  customBiomeId     String?
-  customBiome       CustomBiomeType?   @relation(fields: [customBiomeId], references: [id], onDelete: SetNull)
-  irrigation        IrrigationTypes?
-  countryId         String
-  country           Country            @relation(fields: [countryId], references: [id], name: "CountryConstants")
-  soil              SoilTypes?
-  cultivationSystem CultivationSystem?
-  customSoilId      String?
-  customSoil        CustomSoilType?    @relation(fields: [customSoilId], references: [id], onDelete: SetNull)
+  environmentId     String
+  environment       Environment        @relation(fields: [environmentId], references: [id], onDelete: Cascade)
   cultivarId        String
   cultivar          Cultivar           @relation(fields: [cultivarId], references: [id], onDelete: Cascade)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  linkReference     String             @default("")
+  referenceId       String
+  reference         Reference          @relation(fields: [referenceId], references: [id], onDelete: Cascade)
+
+  @@unique([referenceId, environmentId, cultivarId, type])
+}
+
+model Environment {
+  id                String             @id @default(uuid())
+  climate           String?           
+  biome             String?             
+  customBiome       String?            
+  irrigation        IrrigationTypes?   
+  countryId         String
+  country           Country            @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  soil              SoilTypes?        
+  customSoil        String?            
+  cultivationSystem CultivationSystem? 
+  constants         Constant[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model Reference {
+  id                  String       @id @default(uuid())
+  title               String
+  comment             String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt   
+  cultivarReferences  CultivarReference[]
+  constants           Constant[]
+  cultivarReviews     CultivarReview[]
 }
 
 model Crop {
@@ -78,14 +83,15 @@ model Crop {
 }
 
 model Cultivar {
-  id        String       @id @default(uuid())
-  name      String
-  constants Constant[]
-  crop      Crop         @relation(fields: [cropId], references: [id], onDelete: Cascade)
-  cropId    String
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  reviews CultivarReview[]
+  id                String       @id @default(uuid())
+  name              String
+  crop              Crop         @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  cropId            String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  reviews           CultivarReview[]
+  cultivarReferences CultivarReference[]
+  constants         Constant[]  
 }
 
 model PasswordResetToken {
@@ -106,8 +112,21 @@ model CultivarReview {
   status         ReviewStatus @default(Pending)
   userId         String       
   cultivarId     String        
+  referenceId    String
+  reference      Reference    @relation(fields: [referenceId], references: [id], onDelete: SetNull)
   createdAt      DateTime     @default(now())
   reviewed_at    DateTime?
+}
+
+model CultivarReference {
+  cultivarId  String    @map("cultivar_id")
+  referenceId String    @map("reference_id")
+  cultivar    Cultivar  @relation(fields: [cultivarId], references: [id])
+  reference   Reference @relation(fields: [referenceId], references: [id])
+  createdAt   DateTime  @default(now())
+
+  @@id([cultivarId, referenceId])
+  @@map("CultivarReferences")
 }
 
 enum UserRoles {

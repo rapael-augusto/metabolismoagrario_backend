@@ -10,6 +10,8 @@ import { CustomBiomeModule } from '@modules/biome/custom-biome.module';
 import { CustomSoilModule } from '@modules/soil/custom-soil.module';
 import { CountriesController } from '@modules/country/country.controller';
 import { PasswordResetModule } from '@modules/password-reset/password-reset.module';
+import ReferenceModule from '@modules/reference/reference.module';
+import EnvironmentModule from '@modules/environment/environment.module';
 
 @Module({
   imports: [
@@ -19,9 +21,9 @@ import { PasswordResetModule } from '@modules/password-reset/password-reset.modu
     CropsModule,
     CultivarsModule,
     CultivarsConstantsModule,
-    CustomBiomeModule,
-    CustomSoilModule,
     PasswordResetModule,
+    ReferenceModule,
+    EnvironmentModule,
     DatabaseModule, // Usar o nome correto do módulo
   ],
   controllers: [CountriesController],
