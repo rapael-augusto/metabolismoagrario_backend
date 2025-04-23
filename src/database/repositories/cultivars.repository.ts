@@ -67,6 +67,7 @@ export class CultivarsRepository {
     type EnvironmentGroup = {
       [key: string]: {
         environment: {
+          id: string;
           climate: string | null;
           biome: string | null;
           customBiome: string | null;
@@ -93,6 +94,7 @@ export class CultivarsRepository {
             if (!acc[environmentId]) {
               acc[environmentId] = {
                 environment: {
+                  id: constant.environment.id,
                   climate: constant.environment.climate,
                   biome: constant.environment.biome,
                   customBiome: constant.environment.customBiome,
