@@ -7,16 +7,20 @@ import {
 } from '@nestjs/common';
 import { UpdateCultivarDto } from './dto/update-cultivar.dto';
 import { CreateCultivarDto } from './dto/create-cultivar.dto';
-import { User } from '@prisma/client';
+import { ReviewStatus, User } from '@prisma/client';
 import { CultivarReviewRepository } from '@db/repositories/cultivarReview.repository';
-import { randomUUID } from 'crypto';
 import { UpdateCultivarReviewDto } from './dto/update-cultivar-review.dto';
+import { ReferenceRepository } from '@db/repositories/reference.repository';
+import { ConstantsRepository } from '@db/repositories/constants.repository';
+import { RejectCultivarReviewDTO } from './dto/reject-cultivar-review.dto';
 
 @Injectable()
 export class CultivarsService {
   constructor(
+    private constantsRepository: ConstantsRepository,
     private cultivarsRepository: CultivarsRepository,
     private cultivarsReviewRepository: CultivarReviewRepository,
+    private referenceRepository: ReferenceRepository,
   ) {}
 
   async create(cropId: string, request: CreateCultivarDto) {
@@ -85,7 +89,7 @@ export class CultivarsService {
     const existingReview = await this.cultivarsReviewRepository.findOne({
       id: reviewId,
       userId: user.id,
-      status: 'Pending',
+      status: ReviewStatus.PENDING,
     });
     if (!existingReview)
       throw new NotFoundException('Review não pode ser alterada!');
@@ -115,9 +119,33 @@ export class CultivarsService {
   async listReviews(user: User) {
     if (user.role === 'ADMIN') {
       return this.cultivarsReviewRepository.findAll(
-        { status: 'Pending' },
         {
-          Cultivar: true,
+          // where
+          status: ReviewStatus.PENDING,
+        },
+        {
+          // Include
+          Cultivar: {
+            include: {
+              crop: {
+                select: {
+                  name: true,
+                  scientificName: true,
+                },
+              },
+            },
+          },
+          reference: true,
+          Constants: true,
+          Environment: {
+            include: {
+              country: {
+                select: {
+                  nome_pais: true,
+                },
+              },
+            },
+          },
           requestedBy: {
             select: {
               name: true,
@@ -127,10 +155,35 @@ export class CultivarsService {
         },
       );
     }
+
     return this.cultivarsReviewRepository.findAll(
-      { userId: user.id },
       {
-        Cultivar: true,
+        // where
+        userId: user.id,
+      },
+      {
+        // Include
+        Cultivar: {
+          include: {
+            crop: {
+              select: {
+                name: true,
+                scientificName: true,
+              },
+            },
+          },
+        },
+        reference: true,
+        Constants: true,
+        Environment: {
+          include: {
+            country: {
+              select: {
+                nome_pais: true,
+              },
+            },
+          },
+        },
         requestedBy: {
           select: {
             name: true,
@@ -139,5 +192,24 @@ export class CultivarsService {
         },
       },
     );
+  }
+
+  async approveReview(reviewId: string) {
+    try {
+      return await this.cultivarsReviewRepository.approveCultivarReview(
+        reviewId,
+      );
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  async rejectReview(reviewId: string, data: RejectCultivarReviewDTO) {
+    try {
+      return await this.cultivarsReviewRepository.rejectCultivarReview(
+        reviewId,
+        data,
+      );
+    } catch (error) {}
   }
 }

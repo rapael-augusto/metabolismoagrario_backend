@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, ReviewStatus, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReferenceDTO } from '@modules/reference/dto/create-reference.dto';
@@ -52,6 +52,14 @@ export class ReferenceRepository {
     });
   }
 
+  async listTitles() {
+    return await this.prisma.reference.findMany({
+      select: {
+        title: true,
+      },
+    });
+  }
+
   async update(id: string, data: UpdateReferenceDto) {
     try {
       return this.prisma.reference.update({
@@ -100,7 +108,10 @@ export class ReferenceRepository {
       if (!referenceStored) {
         // Se não existir a referência, cria e associa à cultivar
         referenceStored = await prisma.reference.create({
-          data: { ...referenceData },
+          data: {
+            ...referenceData,
+            status: ReviewStatus.APPROVED,
+          },
           include: { cultivarReferences: true },
         });
 
@@ -154,6 +165,112 @@ export class ReferenceRepository {
           environmentId: environmentStored.id,
           referenceId: referenceStored.id,
           cultivarId,
+          status: ReviewStatus.APPROVED,
+        })),
+      });
+
+      return {
+        constants: constantsCreated,
+        environment: environmentStored,
+        reference: referenceStored,
+      };
+    });
+  }
+
+  async createFullRequest(
+    cultivarId: string,
+    data: CreateFullReferenceDTO,
+    user: User,
+  ) {
+    const {
+      reference: referenceData,
+      environment: environmentData,
+      constants: constantsData,
+    } = data;
+
+    return this.prisma.$transaction(async (prisma) => {
+      // Procura a referência pelo título (ÚNICO) e carrega a relação com a cultivarId
+      let referenceStored = await prisma.reference.findFirst({
+        where: { title: referenceData.title },
+        include: {
+          cultivarReferences: {
+            where: { cultivarId },
+          },
+        },
+      });
+
+      if (!referenceStored) {
+        // Se não existir a referência, cria e associa à cultivar
+        referenceStored = await prisma.reference.create({
+          data: {
+            ...referenceData,
+            status: ReviewStatus.PENDING,
+          },
+          include: { cultivarReferences: true },
+        });
+
+        await prisma.cultivarReference.create({
+          data: {
+            cultivarId,
+            referenceId: referenceStored.id,
+          },
+        });
+      } else if (referenceStored.cultivarReferences.length === 0) {
+        // Se a referência já existir, verifica se precisa criar a relação com a cultivar
+        await prisma.cultivarReference.create({
+          data: {
+            cultivarId,
+            referenceId: referenceStored.id,
+          },
+        });
+      }
+
+      const { country: countryName, ...rest } = environmentData;
+
+      // Procura país pelo nome (ÚNICO)
+      const countryStored = await prisma.country.findUnique({
+        where: { nome_pais: countryName },
+      });
+
+      if (!countryStored) {
+        throw new NotFoundException(`Country ${countryName} not found.`);
+      }
+
+      // Procura se há um ambiente com as mesmas características, pra evitar de criar um ambiente desnecessário
+      let environmentStored = await prisma.environment.findFirst({
+        where: { ...rest, countryId: countryStored?.id },
+      });
+
+      if (!environmentStored) {
+        // se não houve um ambiente, cria um novo
+        environmentStored = await prisma.environment.create({
+          data: {
+            ...rest,
+            country: {
+              connect: { id: countryStored.id },
+            },
+          },
+        });
+      }
+
+      const reviewStored = await prisma.cultivarReview.create({
+        data: {
+          cultivarId,
+          userId: user.id,
+          referenceId: referenceStored.id,
+          environmentId: environmentStored?.id,
+        },
+      });
+
+      // cria as constantes associando à referência e ao ambiente
+      const constantsCreated = await prisma.constant.createMany({
+        data: constantsData.map((constant: any) => ({
+          ...constant,
+          environmentId: environmentStored.id,
+          referenceId: referenceStored.id,
+          cultivarId,
+          status: ReviewStatus.PENDING,
+          reviewId: reviewStored.id,
         })),
       });
 

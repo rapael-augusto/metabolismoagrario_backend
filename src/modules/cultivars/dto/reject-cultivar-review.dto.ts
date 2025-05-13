@@ -5,16 +5,22 @@ import {
   IsOptional,
   IsString,
   Length,
+  ValidateIf,
 } from 'class-validator';
 
-export class JudgeCultivarReviewDTO {
+export class RejectCultivarReviewDTO {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   @Length(3)
-  Justification?: string;
+  justification?: string;
 
   @IsEnum(ReviewStatus)
   @IsNotEmpty()
+  @ValidateIf(
+    (o) =>
+      o.status === ReviewStatus.CHANGES_REQUESTED ||
+      o.status === ReviewStatus.REJECTED,
+  )
   status: ReviewStatus;
 }

@@ -16,6 +16,7 @@ import { Role } from 'src/auth/decorators/user-role-decorator';
 import { CurrentUser } from 'src/auth/decorators/current-user-decorator';
 import { User } from '@prisma/client';
 import { UpdateCultivarReviewDto } from './dto/update-cultivar-review.dto';
+import { RejectCultivarReviewDTO } from './dto/reject-cultivar-review.dto';
 
 @Controller('cultivars')
 export class CultivarsController {
@@ -107,5 +108,20 @@ export class CultivarsController {
     @CurrentUser() user: User,
   ) {
     return await this.cultivarsService.removeCultivarReview(reviewId, user);
+  }
+
+  @Post('/review/approve/:reviewId')
+  @Role('ADMIN')
+  async approveCultivarReview(@Param('reviewId') reviewId: string) {
+    return await this.cultivarsService.approveReview(reviewId);
+  }
+
+  @Post('/review/reject/:reviewId')
+  @Role('ADMIN')
+  async rejectCultivarReview(
+    @Param('reviewId') reviewId: string,
+    @Body() data: RejectCultivarReviewDTO,
+  ) {
+    return await this.cultivarsService.rejectReview(reviewId, data);
   }
 }

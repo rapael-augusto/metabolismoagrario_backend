@@ -2,7 +2,7 @@ import { PrismaService } from 'src/prisma.service';
 import { UpdateCultivarDto } from '@modules/cultivars/dto/update-cultivar.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCultivarDto } from '@modules/cultivars/dto/create-cultivar.dto';
-import { ConstantTypes } from '@prisma/client';
+import { ConstantTypes, ReviewStatus } from '@prisma/client';
 
 @Injectable()
 export class CultivarsRepository {
@@ -16,30 +16,13 @@ export class CultivarsRepository {
 
   async findById(id: string) {
     const cultivar = await this.prisma.cultivar.findUnique({
-      where: {
-        id,
-        OR: [
-          {
-            cultivarReferences: {
-              some: {
-                reference: {
-                  cultivarReviews: { every: { status: 'Approved' } },
-                },
-              },
-            },
-          },
-          {
-            cultivarReferences: {
-              none: {},
-            },
-          },
-        ],
-      },
+      where: { id },
       include: {
         cultivarReferences: {
           include: {
             reference: {
               include: {
+                cultivarReviews: true,
                 constants: {
                   include: {
                     environment: {
@@ -59,6 +42,16 @@ export class CultivarsRepository {
         },
       },
     });
+
+    if (cultivar) {
+      cultivar.cultivarReferences = cultivar.cultivarReferences.filter((cr) => {
+        const reviews = cr.reference?.cultivarReviews || [];
+        return (
+          reviews.length === 0 || // sem reviews
+          reviews.every((review) => review.status === ReviewStatus.APPROVED) // todas aprovadas
+        );
+      });
+    }
 
     if (!cultivar) {
       return null;
