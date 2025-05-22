@@ -4,19 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateReferenceDTO } from './dto/create-reference.dto';
 import { CultivarsRepository } from '@db/repositories/cultivars.repository';
 import { CreateFullReferenceDTO } from './dto/create-full-reference.dto';
-import { PrismaClient, User } from '@prisma/client';
-import { EnvironmentRepository } from '@db/repositories/environment.repository';
-import { ConstantsRepository } from '@db/repositories/constants.repository';
-import { constants } from 'buffer';
+import { Prisma, User } from '@prisma/client';
 import { CultivarReviewRepository } from '@db/repositories/cultivarReview.repository';
 
 @Injectable()
 export class ReferenceService {
-  private prisma = new PrismaClient();
-
   constructor(
     private readonly referenceRepository: ReferenceRepository,
     private readonly cultivarsRepository: CultivarsRepository,
@@ -25,41 +19,54 @@ export class ReferenceService {
 
   async create(cultivarId: string, data: CreateFullReferenceDTO, user: User) {
     const cultivar = await this.cultivarsRepository.findById(cultivarId);
-    if (!cultivar) throw new NotFoundException('Nenhuma cultivar encontrada');
+    const isAdmin = user.role === 'ADMIN';
 
-    // Implementa uma transação (ou cria todos os modelos ou dá rollback no banco)
-    const result = await this.referenceRepository.createFullReference(
-      cultivarId,
-      data,
-    );
-
-    // Se não foi possível criar o ambiente, retorna erro
-    if (!result.environment) {
-      throw new BadRequestException("Environment can't be created");
+    if (!cultivar) {
+      throw new NotFoundException('Cultivar não encontrada');
     }
 
-    // Se não foi possível criar as constants, retorna erro
-    if (!result.constants) {
-      throw new BadRequestException("Constants can't be created");
-    }
+    try {
+      const result = isAdmin
+        ? await this.referenceRepository.createFullReference(cultivarId, data)
+        : await this.referenceRepository.createFullRequest(
+            cultivarId,
+            data,
+            user,
+          );
 
-    // Se não foi possível criar a referência, retorna erro
-    if (!result.reference) {
-      throw new BadRequestException("Reference can't be created");
-    }
+      if (!result?.reference) {
+        throw new BadRequestException('Erro ao criar a referência');
+      }
 
-    // Se conseguiu criar todos os modelos relacionados à referência e for OPERADOR
-    // Cria um review com status pendente (ADMINS VÃO REVISAR)
-    if (result.constants && user.role === 'OPERATOR') {
-      const { reference } = result;
-      const review = await this.cultivarReviewsRepository.create({
-        cultivarId,
-        referenceId: reference.id,
-        userId: user.id,
-      });
-      return { ...result, review };
-    }
+      if (!result.environment) {
+        throw new BadRequestException('Erro ao criar o ambiente associado');
+      }
 
-    return result;
+      if (!result.constants) {
+        throw new BadRequestException(
+          'Erro ao criar as constantes da referência',
+        );
+      }
+
+      return result;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new BadRequestException(
+          'Já existe uma referência com essa combinação de ambiente, cultivar e tipo.',
+        );
+      }
+
+      console.error('Erro inesperado ao criar referência:', error);
+      throw new BadRequestException(
+        'Erro ao criar a referência. Por favor, tente novamente ou contate o suporte.',
+      );
+    }
+  }
+
+  async listTitles() {
+    return this.referenceRepository.listTitles();
   }
 }

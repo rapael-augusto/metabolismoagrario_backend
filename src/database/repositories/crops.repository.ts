@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { UpdateCropDto } from '@modules/crops/dto/update-crop.dto';
+import { ReviewStatus } from '@prisma/client';
 
 export interface CreateCropData {
   id: string;
@@ -21,14 +22,7 @@ export class CropsRepository {
     return await this.prisma.crop.findUnique({
       where: { id },
       include: {
-        cultivars: {
-          where: {
-            OR: [
-              { reviews: { none: {} } }, // criadas por quem tem permissão
-              { reviews: { some: { status: 'Approved' } } }, // solicitações aprovadas por ADMIN
-            ],
-          },
-        },
+        cultivars: true,
       },
     });
   }

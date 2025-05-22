@@ -42,6 +42,9 @@ model Constant {
   updatedAt         DateTime           @updatedAt
   referenceId       String
   reference         Reference          @relation(fields: [referenceId], references: [id], onDelete: Cascade)
+  status            ReviewStatus       @default(PENDING)
+  reviewId          String?
+  Review            CultivarReview?    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
   @@unique([referenceId, environmentId, cultivarId, type])
 }
@@ -60,6 +63,7 @@ model Environment {
   constants         Constant[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+  Reviews            CultivarReview[]
 }
 
 model Reference {
@@ -71,6 +75,7 @@ model Reference {
   cultivarReferences  CultivarReference[]
   constants           Constant[]
   cultivarReviews     CultivarReview[]
+  status              ReviewStatus @default(PENDING)
 }
 
 model Crop {
@@ -109,13 +114,16 @@ model CultivarReview {
   justification  String?
   Cultivar       Cultivar     @relation(fields: [cultivarId], references: [id], onDelete: Cascade)
   requestedBy    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status         ReviewStatus @default(Pending)
+  status         ReviewStatus @default(PENDING)
   userId         String       
   cultivarId     String        
   referenceId    String
   reference      Reference    @relation(fields: [referenceId], references: [id], onDelete: SetNull)
+  environmentId  String?
+  Environment    Environment? @relation(fields: [environmentId], references: [id], onDelete: SetNull)
   createdAt      DateTime     @default(now())
   reviewed_at    DateTime?
+  Constants      Constant[]
 }
 
 model CultivarReference {
@@ -135,9 +143,10 @@ enum UserRoles {
 }
 
 enum ReviewStatus {
-  Pending
-  Approved
-  Declined
+  PENDING
+  APPROVED
+  CHANGES_REQUESTED
+  REJECTED
 }
 
 enum IrrigationTypes {
