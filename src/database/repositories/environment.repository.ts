@@ -20,7 +20,7 @@ export class EnvironmentRepository {
     });
     if (!countryStored) {
       throw new NotFoundException(
-        `Country com ID ${countryName} não encontrado.`,
+        `País com ID ${countryName} não encontrado.`,
       );
     }
     return await this.prisma.environment.create({
@@ -61,7 +61,7 @@ export class EnvironmentRepository {
     try {
       return await this.prisma.environment.delete({ where: { id } });
     } catch (error) {
-      throw new NotFoundException(`Environment com id ${id} não existe`);
+      throw new NotFoundException(`Ambiente com id ${id} não existe`);
     }
   }
 }

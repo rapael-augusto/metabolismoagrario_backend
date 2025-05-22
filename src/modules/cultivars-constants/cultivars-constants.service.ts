@@ -32,13 +32,13 @@ export class CultivarsConstantsService {
     try {
       const { referenceId, environmentId } = data;
       const referenceStored = this.referenceRepository.findById(referenceId);
-      if (!referenceStored) throw new NotFoundException('Reference not found');
+      if (!referenceStored) throw new NotFoundException('Referência não encontrada');
 
       const environmentStored =
         this.environmentRepository.findById(environmentId);
 
       if (!environmentStored)
-        throw new NotFoundException('Environment not found');
+        throw new NotFoundException('Ambiente não encontrado');
 
       return this.cultivarsConstantsRepository.createMany(data, cultivarId);
     } catch (error) {

@@ -33,7 +33,7 @@ export class PasswordResetService {
   async create(data: CreatePasswordResetDTO) {
     try {
       const user = await this.userRepository.findByEmail(data.email);
-      if (!user) throw new NotFoundException('User not found!');
+      if (!user) throw new NotFoundException('Usuário não foi encontrado!');
       const existingToken = await this.passwordResetRepository.findByUserId(
         user.id,
       );
@@ -56,12 +56,12 @@ export class PasswordResetService {
 
   async getValidExistingToken(token: string) {
     const existingToken = await this.passwordResetRepository.findByToken(token);
-    if (!existingToken) throw new NotFoundException('Reset token not found!');
+    if (!existingToken) throw new NotFoundException('Token de reset não foi encontrado!');
     // Se o token estiver expirado, deleta ele do banco
     const isExpired = await this.isTokenExpired(existingToken.createdAt);
     if (isExpired) {
       await this.passwordResetRepository.delete(existingToken.userId);
-      throw new ConflictException('Reset token is expired!');
+      throw new ConflictException('Token de reset foi expirado!');
     }
     return existingToken;
   }

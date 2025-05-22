@@ -19,7 +19,7 @@ export class SessionService {
     const user = await this.userRepository.findByEmail(request.email);
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Usuário não foi encontrado');
     }
 
     const isPasswordValid = await bcryptCompare(
@@ -28,7 +28,7 @@ export class SessionService {
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new UnauthorizedException('Senha inválida');
     }
 
     const { accessToken, refreshToken } = await generateAccessTokens(
@@ -55,7 +55,7 @@ export class SessionService {
     const user = await this.userRepository.findById(request.userId);
 
     if (!user || !user.refreshToken) {
-      throw new UnauthorizedException('Access denied');
+      throw new UnauthorizedException('Acesso negado');
     }
 
     const isRefreshTokenValid = await bcryptCompare(
@@ -64,7 +64,7 @@ export class SessionService {
     );
 
     if (!isRefreshTokenValid) {
-      throw new UnauthorizedException('Access denied');
+      throw new UnauthorizedException('Acesso negado');
     }
 
     const tokens = await generateAccessTokens(user, this.encrypter);
