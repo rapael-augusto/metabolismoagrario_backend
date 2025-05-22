@@ -136,7 +136,11 @@ export class CultivarsService {
             },
           },
           reference: true,
-          Constants: true,
+          Constants: {
+            where: {
+              status: ReviewStatus.PENDING,
+            },
+          },
           Environment: {
             include: {
               country: {
