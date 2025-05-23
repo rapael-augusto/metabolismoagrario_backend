@@ -48,7 +48,7 @@ export class ConstantsRepository {
       return await this.prisma.constant.delete({ where: { id } });
     } catch (error) {
       throw new NotFoundException(
-        `Conversion factor with id ${id} does not exist`,
+        `Fator de conversão com id ${id} não existe`,
       );
     }
   }

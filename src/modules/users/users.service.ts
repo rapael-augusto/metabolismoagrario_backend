@@ -54,7 +54,7 @@ export class UsersService {
 
   async findOne(id: string): Promise<UserResponseDto | null> {
     const user = await this.userRepository.findById(id);
-    if (!user) throw new NotFoundException('User not found.');
+    if (!user) throw new NotFoundException('Usuário não foi encontrado.');
     return plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,
     });
@@ -65,19 +65,19 @@ export class UsersService {
     const { email, password, oldPassword } = data;
     const user = await this.userRepository.findById(id);
 
-    if (!user) throw new NotFoundException('User not found.');
+    if (!user) throw new NotFoundException('Usuário não foi encontrado.');
 
     if (email && email !== user.email) {
       const emailInUse = await this.userRepository.findByEmail(email);
       if (emailInUse) {
-        throw new ConflictException('User already exists with this email.');
+        throw new ConflictException('Um usuário já existe com esse e-mail.');
       }
     }
 
     if (oldPassword && password) {
       const passwordMatch = await compare(oldPassword, user.password);
       if (!passwordMatch) {
-        throw new ConflictException('Old password does not match.');
+        throw new ConflictException('Senha antiga não corresponde.');
       }
       data.password = await bcryptHash(password, 8);
     }

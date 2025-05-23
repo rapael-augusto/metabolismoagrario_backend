@@ -77,7 +77,7 @@ export class ReferenceRepository {
     try {
       return await this.prisma.reference.delete({ where: { id } });
     } catch (error) {
-      throw new NotFoundException(`Reference com id ${id} não existe`);
+      throw new NotFoundException(`Referência com id ${id} não existe`);
     }
   }
 
@@ -139,7 +139,7 @@ export class ReferenceRepository {
       });
 
       if (!countryStored) {
-        throw new NotFoundException(`Country ${countryName} not found.`);
+        throw new NotFoundException(`País ${countryName} not found.`);
       }
 
       // Procura se há um ambiente com as mesmas características, pra evitar de criar um ambiente desnecessário
@@ -233,7 +233,7 @@ export class ReferenceRepository {
       });
 
       if (!countryStored) {
-        throw new NotFoundException(`Country ${countryName} not found.`);
+        throw new NotFoundException(`País ${countryName} not found.`);
       }
 
       // Procura se há um ambiente com as mesmas características, pra evitar de criar um ambiente desnecessário
