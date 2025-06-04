@@ -162,4 +162,8 @@ export class CultivarReviewRepository {
       return updatedReview;
     });
   }
+
+  async removeMany(where: Prisma.CultivarReviewWhereInput) {
+    return await this.prisma.cultivarReview.deleteMany({ where });
+  }
 }

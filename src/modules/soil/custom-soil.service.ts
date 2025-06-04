@@ -8,32 +8,32 @@ import { UpdateCustomSoilDto } from "./dto/update-custom-soil.dto";
 export class CustomSoilService {
   constructor(private customSoilRepository: CustomSoilRepository) {}
 
-  async create(request: CreateCustomSoilDto) {
-    const createCustomSoilData: CreateCustomSoilData = {
-      id: randomUUID(),
-      name: request.name,
-    }
+  // async create(request: CreateCustomSoilDto) {
+  //   const createCustomSoilData: CreateCustomSoilData = {
+  //     id: randomUUID(),
+  //     name: request.name,
+  //   }
 
-    return await this.customSoilRepository.create(createCustomSoilData)
-  }
+  //   return await this.customSoilRepository.create(createCustomSoilData)
+  // }
 
-  async findAll() {
-    const customSoil = await this.customSoilRepository.findAll()
+  // async findAll() {
+  //   const customSoil = await this.customSoilRepository.findAll()
 
-    return customSoil
-  }
+  //   return customSoil
+  // }
 
-  async findOne(id: string) {
-    const customSoil = await this.customSoilRepository.findById(id)  
-  
-    return customSoil
-  }
+  // async findOne(id: string) {
+  //   const customSoil = await this.customSoilRepository.findById(id)
 
-  async update(id: string, updateCustomSoilDto: UpdateCustomSoilDto) {
-    return await this.customSoilRepository.update(id, updateCustomSoilDto)
-  }
+  //   return customSoil
+  // }
 
-  async remove(id: string) {
-    return await this.customSoilRepository.remove(id)
-  }
+  // async update(id: string, updateCustomSoilDto: UpdateCustomSoilDto) {
+  //   return await this.customSoilRepository.update(id, updateCustomSoilDto)
+  // }
+
+  // async remove(id: string) {
+  //   return await this.customSoilRepository.remove(id)
+  // }
 }

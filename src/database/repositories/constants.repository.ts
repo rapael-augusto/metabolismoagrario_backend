@@ -4,6 +4,7 @@ import {
   ConstantTypes,
   CultivationSystem,
   IrrigationTypes,
+  Prisma,
   SoilTypes,
 } from '@prisma/client';
 import { BiomeTypes, ClimatesTypes } from '@/types/index';
@@ -47,9 +48,11 @@ export class ConstantsRepository {
     try {
       return await this.prisma.constant.delete({ where: { id } });
     } catch (error) {
-      throw new NotFoundException(
-        `Fator de conversão com id ${id} não existe`,
-      );
+      throw new NotFoundException(`Fator de conversão com id ${id} não existe`);
     }
+  }
+
+  async removeMany(where: Prisma.ConstantWhereInput) {
+    return await this.prisma.constant.deleteMany({ where });
   }
 }

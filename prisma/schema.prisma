@@ -63,7 +63,7 @@ model Environment {
   constants         Constant[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  Reviews            CultivarReview[]
+  Reviews           CultivarReview[]
 }
 
 model Reference {
@@ -118,7 +118,7 @@ model CultivarReview {
   userId         String       
   cultivarId     String        
   referenceId    String
-  reference      Reference    @relation(fields: [referenceId], references: [id], onDelete: SetNull)
+  reference      Reference    @relation(fields: [referenceId], references: [id], onDelete: Cascade)
   environmentId  String?
   Environment    Environment? @relation(fields: [environmentId], references: [id], onDelete: SetNull)
   createdAt      DateTime     @default(now())
@@ -129,8 +129,8 @@ model CultivarReview {
 model CultivarReference {
   cultivarId  String    @map("cultivar_id")
   referenceId String    @map("reference_id")
-  cultivar    Cultivar  @relation(fields: [cultivarId], references: [id])
-  reference   Reference @relation(fields: [referenceId], references: [id])
+  cultivar    Cultivar  @relation(fields: [cultivarId], references: [id], onDelete: Cascade)
+  reference Reference @relation(fields: [referenceId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
 
   @@id([cultivarId, referenceId])

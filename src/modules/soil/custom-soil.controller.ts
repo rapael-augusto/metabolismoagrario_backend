@@ -10,35 +10,35 @@ import { UpdateCustomSoilDto } from './dto/update-custom-soil.dto';
 export class CustomSoilController {
   constructor(private readonly customSoilService: CustomSoilService) {}
 
-  @Post()
-  @Role(UserRoles.ADMIN)
-  async create(@Body() createCustomSoilDto: CreateCustomSoilDto) {
-    return await this.customSoilService.create({ ...createCustomSoilDto })
-  }  
+  // @Post()
+  // @Role(UserRoles.ADMIN)
+  // async create(@Body() createCustomSoilDto: CreateCustomSoilDto) {
+  //   return await this.customSoilService.create({ ...createCustomSoilDto })
+  // }
 
-  @PublicRoute()
-  @Get()
-  async findAll() {
-    return await this.customSoilService.findAll()
-  }
+  // @PublicRoute()
+  // @Get()
+  // async findAll() {
+  //   return await this.customSoilService.findAll()
+  // }
 
-  @PublicRoute()
-  @Get(':id')
-  async findOne(@Param("id") id: string) {
-    return await this.customSoilService.findOne(id)
-  }
+  // @PublicRoute()
+  // @Get(':id')
+  // async findOne(@Param("id") id: string) {
+  //   return await this.customSoilService.findOne(id)
+  // }
 
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateCustomSoilDto: UpdateCustomSoilDto) {
-    return await this.customSoilService.update(id, updateCustomSoilDto)
-  }
+  // @Patch(':id')
+  // async update(@Param('id') id: string, @Body() updateCustomSoilDto: UpdateCustomSoilDto) {
+  //   return await this.customSoilService.update(id, updateCustomSoilDto)
+  // }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    try {
-      return await this.customSoilService.remove(id)
-    } catch(error) {
-      throw new NotFoundException(`Solo com id ${id} não xiste`)
-    }
-  }
+  // @Delete(':id')
+  // async remove(@Param('id') id: string) {
+  //   try {
+  //     return await this.customSoilService.remove(id)
+  //   } catch(error) {
+  //     throw new NotFoundException(`Solo com id ${id} não xiste`)
+  //   }
+  // }
 }

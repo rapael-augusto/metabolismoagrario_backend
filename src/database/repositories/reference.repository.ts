@@ -60,7 +60,7 @@ export class ReferenceRepository {
     });
   }
 
-  async update(id: string, data: UpdateReferenceDto) {
+  async update(id: string, data: Prisma.ReferenceUpdateInput) {
     try {
       return this.prisma.reference.update({
         data,
@@ -74,11 +74,11 @@ export class ReferenceRepository {
   }
 
   async remove(id: string) {
-    try {
-      return await this.prisma.reference.delete({ where: { id } });
-    } catch (error) {
-      throw new NotFoundException(`Referência com id ${id} não existe`);
-    }
+    return this.prisma.reference.delete({ where: { id } });
+  }
+
+  async removeMany(where: Prisma.ReferenceWhereInput) {
+    return this.prisma.reference.deleteMany({ where });
   }
 
   /*
