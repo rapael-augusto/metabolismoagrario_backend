@@ -6,29 +6,29 @@ import { UpdateCustomBiomeDto } from "./dto/update-custom-biome.dto";
 
 @Injectable()
 export class CustomBiomeService {
-  constructor(private customBiomeRepository: CustomBiomeRepository) { }
+  constructor(private customBiomeRepository: CustomBiomeRepository) {}
 
-  async create(resquest: CreateCustomBiomeDto) {
-    const createCustomBiomeData: CreateCustomBiomeData = {
-      id: randomUUID(),
-      name: resquest.name
-    }
-    return await this.customBiomeRepository.create(createCustomBiomeData)
-  }
+  // async create(resquest: CreateCustomBiomeDto) {
+  //   const createCustomBiomeData: CreateCustomBiomeData = {
+  //     id: randomUUID(),
+  //     name: resquest.name
+  //   }
+  //   return await this.customBiomeRepository.create(createCustomBiomeData)
+  // }
 
-  async findOne(id: string) {
-    return await this.customBiomeRepository.findOne(id)
-  }
+  // async findOne(id: string) {
+  //   return await this.customBiomeRepository.findOne(id)
+  // }
 
-  async findAll() {
-    return await this.customBiomeRepository.findAll()
-  }
+  // async findAll() {
+  //   return await this.customBiomeRepository.findAll()
+  // }
 
-  async update(id: string, UpdateCustomBiomeDto: UpdateCustomBiomeDto) {
-    return await this.customBiomeRepository.update(id, UpdateCustomBiomeDto)
-  }
+  // async update(id: string, UpdateCustomBiomeDto: UpdateCustomBiomeDto) {
+  //   return await this.customBiomeRepository.update(id, UpdateCustomBiomeDto)
+  // }
 
-  async remove(id: string) {
-    return await this.customBiomeRepository.remove(id)
-  }
+  // async remove(id: string) {
+  //   return await this.customBiomeRepository.remove(id)
+  // }
 }
