@@ -112,6 +112,7 @@ export class CultivarsRepository {
         return {
           id: ref.reference.id,
           title: ref.reference.title,
+          comment: ref.reference.comment,
           environments: Object.values(environmentsMap),
         };
       },
