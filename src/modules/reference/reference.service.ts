@@ -174,6 +174,7 @@ export class ReferenceService {
   // Verifica se existe constantes associadas a [referenceID, environmentId]
   // Se houver, apaga as constantes. Verifica se ainda há constantes associadas
   // ao environmentId. Se não houver, deleta o environment
+  // se não houver mais constants associadas à referência, apaga a referência
   async removeManyEnvironments(
     referenceId: string,
     data: DeleteManyEnvironmentsDto,
@@ -198,8 +199,18 @@ export class ReferenceService {
       : [];
 
     // Deleta os environments sem constantes
-    return this.environmentRepository.removeMany({
+    const environmentDeleted = await this.environmentRepository.removeMany({
       id: { in: environmentsToDelete },
     });
+
+    // Verifica se a referência ainda tem constants
+    const referenceHasConstants = await this.constantsRepository.find({
+      referenceId,
+    });
+
+    if (referenceHasConstants) return environmentDeleted;
+
+    // remove a referência orfã de constants
+    await this.referenceRepository.remove(referenceId);
   }
 }
