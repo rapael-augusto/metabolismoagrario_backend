@@ -52,6 +52,24 @@ export class ConstantsRepository {
     }
   }
 
+  async findMany(
+    where?: Prisma.ConstantWhereInput,
+    include?: Prisma.ConstantInclude,
+  ) {
+    return this.prisma.constant.findMany({ where, include });
+  }
+
+  async find(
+    where?: Prisma.ConstantWhereInput,
+    include?: Prisma.ConstantInclude,
+  ) {
+    return this.prisma.constant.findFirst({ where, include });
+  }
+
+  async findById(id: string) {
+    return this.prisma.constant.findUnique({ where: { id } });
+  }
+
   async removeMany(where: Prisma.ConstantWhereInput) {
     return await this.prisma.constant.deleteMany({ where });
   }

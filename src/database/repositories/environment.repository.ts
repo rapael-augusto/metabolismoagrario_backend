@@ -19,9 +19,7 @@ export class EnvironmentRepository {
       where: { nome_pais: countryName },
     });
     if (!countryStored) {
-      throw new NotFoundException(
-        `País com ID ${countryName} não encontrado.`,
-      );
+      throw new NotFoundException(`País com ID ${countryName} não encontrado.`);
     }
     return await this.prisma.environment.create({
       data: {
@@ -63,5 +61,9 @@ export class EnvironmentRepository {
     } catch (error) {
       throw new NotFoundException(`Ambiente com id ${id} não existe`);
     }
+  }
+
+  async removeMany(where: Prisma.EnvironmentWhereInput) {
+    return await this.prisma.environment.deleteMany({ where });
   }
 }
