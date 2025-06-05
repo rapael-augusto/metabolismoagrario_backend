@@ -15,6 +15,7 @@ import {
 } from './dto/update-reference.dto';
 import { EnvironmentRepository } from '@db/repositories/environment.repository';
 import { DeleteManyReferenceDTO } from './dto/delete-many-reference.dto';
+import { DeleteManyEnvironmentsDto } from './dto/delete-many-environment.dto';
 
 @Injectable()
 export class ReferenceService {
@@ -168,5 +169,37 @@ export class ReferenceService {
     if (referenceData) {
       await this.referenceRepository.update(referenceId, referenceData);
     }
+  }
+
+  // Verifica se existe constantes associadas a [referenceID, environmentId]
+  // Se houver, apaga as constantes. Verifica se ainda há constantes associadas
+  // ao environmentId. Se não houver, deleta o environment
+  async removeManyEnvironments(
+    referenceId: string,
+    data: DeleteManyEnvironmentsDto,
+  ) {
+    const { environments: environmentIds } = data;
+
+    // Remove constantes associadas aos environments
+    await this.constantsRepository.removeMany({
+      referenceId,
+      environmentId: { in: environmentIds },
+    });
+
+    const environmentsWithConstants = await this.constantsRepository.findMany({
+      environmentId: { in: environmentIds },
+    });
+
+    const environmentsToDelete = environmentsWithConstants
+      ? environmentIds.filter(
+          (id) =>
+            !environmentsWithConstants.some((c) => c.environmentId === id),
+        )
+      : [];
+
+    // Deleta os environments sem constantes
+    return this.environmentRepository.removeMany({
+      id: { in: environmentsToDelete },
+    });
   }
 }

@@ -14,6 +14,7 @@ import { User } from '@prisma/client';
 import { Role } from 'src/auth/decorators/user-role-decorator';
 import { DeleteManyReferenceDTO } from './dto/delete-many-reference.dto';
 import { UpdateReferenceDto } from './dto/update-reference.dto';
+import { DeleteManyEnvironmentsDto } from './dto/delete-many-environment.dto';
 
 @Controller('references')
 export class ReferenceController {
@@ -52,5 +53,13 @@ export class ReferenceController {
     @Body() data: UpdateReferenceDto,
   ) {
     return this.referenceService.update(referenceId, data);
+  }
+
+  @Delete('/environment/:referenceId')
+  async deleteManyEnvironment(
+    @Param('referenceId') referenceId: string,
+    @Body() data: DeleteManyEnvironmentsDto,
+  ) {
+    return this.referenceService.removeManyEnvironments(referenceId, data);
   }
 }
