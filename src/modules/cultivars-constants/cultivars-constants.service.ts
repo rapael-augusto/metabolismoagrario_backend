@@ -32,7 +32,8 @@ export class CultivarsConstantsService {
     try {
       const { referenceId, environmentId } = data;
       const referenceStored = this.referenceRepository.findById(referenceId);
-      if (!referenceStored) throw new NotFoundException('Referência não encontrada');
+      if (!referenceStored)
+        throw new NotFoundException('Referência não encontrada');
 
       const environmentStored =
         this.environmentRepository.findById(environmentId);
@@ -47,12 +48,12 @@ export class CultivarsConstantsService {
   }
 
   async update(
-    cultivarId: string,
+    constantId: string,
     updateCultivarsConstantDto: UpdateCultivarsConstantDto,
   ) {
     try {
       return await this.cultivarsConstantsRepository.update(
-        cultivarId,
+        constantId,
         updateCultivarsConstantDto,
       );
     } catch (error) {

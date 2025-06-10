@@ -1,6 +1,6 @@
-import { CreateCultivarConstantDto } from "./create-cultivars-constant.dto";
-import { PartialType } from "@nestjs/mapped-types";
+import { IsNumber } from 'class-validator';
 
-export class UpdateCultivarsConstantDto extends PartialType(
-  CreateCultivarConstantDto,
-) {}
+export class UpdateCultivarsConstantDto {
+  @IsNumber()
+  value: number;
+}
