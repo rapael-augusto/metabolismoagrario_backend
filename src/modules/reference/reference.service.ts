@@ -7,26 +7,21 @@ import {
 import { CultivarsRepository } from '@db/repositories/cultivars.repository';
 import { CreateFullReferenceDTO } from './dto/create-full-reference.dto';
 import { Prisma, PrismaClient, User } from '@prisma/client';
-import { CultivarReviewRepository } from '@db/repositories/cultivarReview.repository';
-import { ConstantsRepository } from '@db/repositories/constants.repository';
-import {
-  ReferenceUpdateCultivarConstantDto,
-  UpdateReferenceDto,
-} from './dto/update-reference.dto';
-import { EnvironmentRepository } from '@db/repositories/environment.repository';
+import { UpdateReferenceDto } from './dto/update-reference.dto';
 import { DeleteManyReferenceDTO } from './dto/delete-many-reference.dto';
-import { DeleteManyEnvironmentsDto } from './dto/delete-many-environment.dto';
-
+import { UpdateEnvironmentDTO } from '@modules/environment/dto/update-environment.dto';
+import { EnvironmentRepository } from '@db/repositories/environment.repository';
+import { ConstantsRepository } from '@db/repositories/constants.repository';
+import { CreateEnvironmentDTO } from '@modules/environment/dto/create-envirionment.dto';
+import { BiomeTypes, ClimatesTypes } from '@/types/index';
 @Injectable()
 export class ReferenceService {
   private readonly prisma = new PrismaClient();
-
   constructor(
     private readonly referenceRepository: ReferenceRepository,
     private readonly cultivarsRepository: CultivarsRepository,
-    private readonly cultivarReviewsRepository: CultivarReviewRepository,
-    private readonly constantsRepository: ConstantsRepository,
     private readonly environmentRepository: EnvironmentRepository,
+    private readonly constantsRepository: ConstantsRepository,
   ) {}
 
   async create(cultivarId: string, data: CreateFullReferenceDTO, user: User) {
@@ -117,100 +112,87 @@ export class ReferenceService {
     if (!existingReference)
       throw new NotFoundException('Referência não encontrada');
 
-    const {
-      constants: constantsData,
-      environment: environmentData,
-      reference: referenceData,
-    } = data;
-
-    let associatedEnvironment = null;
-    if (environmentData) {
-      const { country: countryName, ...rest } = environmentData;
-
-      const countryStored = await this.prisma.country.findUnique({
-        where: { nome_pais: countryName },
-      });
-
-      if (!countryStored)
-        throw new NotFoundException(`País '${countryName}' não encontrado`);
-
-      // verificar se já existe um ambiente com as mesmas características
-      let existingEnvironment = await this.environmentRepository.findOne({
-        countryId: countryStored.id,
-        ...rest,
-      });
-
-      // se não encontrou um ambiente, cria outro
-      if (!existingEnvironment) {
-        existingEnvironment = await this.environmentRepository.create(
-          environmentData,
-        );
-      }
-
-      associatedEnvironment = existingEnvironment;
-    }
-
-    if (constantsData) {
-      for (const constantData of constantsData) {
-        const { id: constantId, ...rest } = constantData;
-
-        // adiciona o environmentId (se teve o ambiente mudado)
-        const constantUpdateData = {
-          ...(rest as ReferenceUpdateCultivarConstantDto),
-          ...(associatedEnvironment && {
-            environmentId: associatedEnvironment.id,
-          }),
-        };
-
-        await this.constantsRepository.update(constantId, constantUpdateData);
-      }
-    }
-
-    if (referenceData) {
-      await this.referenceRepository.update(referenceId, referenceData);
-    }
+    await this.referenceRepository.update(referenceId, data);
   }
 
-  // Verifica se existe constantes associadas a [referenceID, environmentId]
-  // Se houver, apaga as constantes. Verifica se ainda há constantes associadas
-  // ao environmentId. Se não houver, deleta o environment
-  // se não houver mais constants associadas à referência, apaga a referência
-  async removeManyEnvironments(
+  async updateReferenceEnvironment(
+    cultivarId: string,
     referenceId: string,
-    data: DeleteManyEnvironmentsDto,
+    environmentId: string,
+    data: UpdateEnvironmentDTO,
   ) {
-    const { environments: environmentIds } = data;
+    const environmentStored: any = await this.environmentRepository.findById(
+      environmentId,
+      { country: true },
+    );
 
-    // Remove constantes associadas aos environments
-    await this.constantsRepository.removeMany({
-      referenceId,
-      environmentId: { in: environmentIds },
+    if (!environmentStored)
+      throw new NotFoundException('Ambiente não encontrado');
+
+    let countryId = environmentStored.countryId;
+    if (data.country) {
+      const country = await this.prisma.country.findFirst({
+        where: { nome_pais: data.country },
+      });
+
+      if (!country) {
+        throw new NotFoundException('País não encontrado');
+      }
+
+      countryId = country.id;
+    }
+
+    const updatedData: CreateEnvironmentDTO = {
+      country: data.country ?? environmentStored.country.nome_pais,
+      climate:
+        (data.climate as ClimatesTypes) ??
+        environmentStored.climate ??
+        undefined,
+      biome: (data.biome as BiomeTypes) ?? environmentStored.biome ?? undefined,
+      customBiome:
+        data.customBiome ?? environmentStored.customBiome ?? undefined,
+      irrigation: data.irrigation ?? environmentStored.irrigation ?? undefined,
+      soil: data.soil ?? environmentStored.soil ?? undefined,
+      customSoil: data.customSoil ?? environmentStored.customSoil ?? undefined,
+      cultivationSystem:
+        data.cultivationSystem ??
+        environmentStored.cultivationSystem ??
+        undefined,
+    };
+
+    // Verifica se já existe outro ambiente com os mesmos dados
+    const existingEnvironment = await this.environmentRepository.findOne({
+      countryId: countryId,
+      climate: updatedData.climate,
+      biome: updatedData.biome,
+      customBiome: updatedData.customBiome,
+      irrigation: updatedData.irrigation,
+      soil: updatedData.soil,
+      customSoil: updatedData.customSoil,
+      cultivationSystem: updatedData.cultivationSystem,
     });
 
-    const environmentsWithConstants = await this.constantsRepository.findMany({
-      environmentId: { in: environmentIds },
+    if (existingEnvironment) {
+      if (existingEnvironment.id === environmentStored.id) return;
+
+      await this.prisma.constant.updateMany({
+        where: { environmentId, referenceId, cultivarId },
+        data: { environmentId: existingEnvironment.id },
+      });
+
+      return existingEnvironment;
+    }
+
+    const cleanData = Object.fromEntries(
+      Object.entries(updatedData).filter(([_, value]) => value !== undefined),
+    ) as CreateEnvironmentDTO;
+
+    const newEnvironment = await this.environmentRepository.create(cleanData);
+
+    // atualiza as constantes pro novo ambiente
+    await this.prisma.constant.updateMany({
+      where: { environmentId, referenceId, cultivarId },
+      data: { environmentId: environmentStored.id },
     });
-
-    const environmentsToDelete = environmentsWithConstants
-      ? environmentIds.filter(
-          (id) =>
-            !environmentsWithConstants.some((c) => c.environmentId === id),
-        )
-      : [];
-
-    // Deleta os environments sem constantes
-    const environmentDeleted = await this.environmentRepository.removeMany({
-      id: { in: environmentsToDelete },
-    });
-
-    // Verifica se a referência ainda tem constants
-    const referenceHasConstants = await this.constantsRepository.find({
-      referenceId,
-    });
-
-    if (referenceHasConstants) return environmentDeleted;
-
-    // remove a referência orfã de constants
-    await this.referenceRepository.remove(referenceId);
   }
 }

@@ -73,4 +73,14 @@ export class ConstantsRepository {
   async removeMany(where: Prisma.ConstantWhereInput) {
     return await this.prisma.constant.deleteMany({ where });
   }
+
+  async updateMany(
+    data: Prisma.ConstantUpdateManyArgs,
+    where: Prisma.ConstantWhereInput,
+  ) {
+    return this.prisma.constant.updateMany({
+      where,
+      data,
+    });
+  }
 }

@@ -29,7 +29,7 @@ export class CreateEnvironmentDTO {
 
   @IsOptional()
   @IsString()
-  customSoil: string;
+  customSoil?: string;
 
   @IsOptional()
   cultivationSystem?: CultivationSystem;
