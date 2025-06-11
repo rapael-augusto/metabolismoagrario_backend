@@ -258,7 +258,7 @@ export class ReferenceRepository {
           cultivarId,
           userId: user.id,
           referenceId: referenceStored.id,
-          environmentId: environmentStored?.id,
+          environmentId: environmentStored.id,
         },
       });
 

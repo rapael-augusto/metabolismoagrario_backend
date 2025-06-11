@@ -119,8 +119,8 @@ model CultivarReview {
   cultivarId     String        
   referenceId    String
   reference      Reference    @relation(fields: [referenceId], references: [id], onDelete: Cascade)
-  environmentId  String?
-  Environment    Environment? @relation(fields: [environmentId], references: [id], onDelete: SetNull)
+  environmentId  String
+  Environment    Environment  @relation(fields: [environmentId], references: [id], onDelete: Cascade)
   createdAt      DateTime     @default(now())
   reviewed_at    DateTime?
   Constants      Constant[]

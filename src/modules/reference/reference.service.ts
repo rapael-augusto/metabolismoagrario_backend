@@ -1,6 +1,7 @@
 import { ReferenceRepository } from '@db/repositories/reference.repository';
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -112,6 +113,16 @@ export class ReferenceService {
     if (!existingReference)
       throw new NotFoundException('Referência não encontrada');
 
+    const referenceWithSameTitle = await this.referenceRepository.findOne({
+      title: data.title,
+      id: {
+        not: referenceId,
+      },
+    });
+
+    if (referenceWithSameTitle)
+      throw new ConflictException('Já existe uma referência com esse título');
+
     await this.referenceRepository.update(referenceId, data);
   }
 
@@ -161,19 +172,23 @@ export class ReferenceService {
     };
 
     // Verifica se já existe outro ambiente com os mesmos dados
-    const existingEnvironment = await this.environmentRepository.findOne({
-      countryId: countryId,
-      climate: updatedData.climate,
-      biome: updatedData.biome,
-      customBiome: updatedData.customBiome,
-      irrigation: updatedData.irrigation,
-      soil: updatedData.soil,
-      customSoil: updatedData.customSoil,
-      cultivationSystem: updatedData.cultivationSystem,
-    });
+    const existingEnvironment = await this.environmentRepository.findOne(
+      {
+        countryId: countryId,
+        climate: updatedData.climate,
+        biome: updatedData.biome,
+        customBiome: updatedData.customBiome,
+        irrigation: updatedData.irrigation,
+        soil: updatedData.soil,
+        customSoil: updatedData.customSoil,
+        cultivationSystem: updatedData.cultivationSystem,
+      },
+      { country: true },
+    );
 
     if (existingEnvironment) {
-      if (existingEnvironment.id === environmentStored.id) return;
+      if (existingEnvironment.id === environmentStored.id)
+        return existingEnvironment;
 
       await this.prisma.constant.updateMany({
         where: { environmentId, referenceId, cultivarId },
@@ -192,7 +207,9 @@ export class ReferenceService {
     // atualiza as constantes pro novo ambiente
     await this.prisma.constant.updateMany({
       where: { environmentId, referenceId, cultivarId },
-      data: { environmentId: environmentStored.id },
+      data: { environmentId: newEnvironment.id },
     });
+
+    return newEnvironment;
   }
 }

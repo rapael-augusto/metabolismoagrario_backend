@@ -6,6 +6,7 @@ import { CultivarsConstantsService } from './cultivars-constants.service';
 @Module({
   imports: [DatabaseModule],
   controllers: [CultivarsConstantsController],
-  providers: [CultivarsConstantsService]
+  providers: [CultivarsConstantsService],
+  exports: [CultivarsConstantsService],
 })
-export class CultivarsConstantsModule { }
+export class CultivarsConstantsModule {}

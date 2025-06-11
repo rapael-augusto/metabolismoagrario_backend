@@ -10,23 +10,31 @@ export class EnvironmentRepository {
   async create(data: CreateEnvironmentDTO) {
     const { country: countryName, ...rest } = data;
 
-    const envStored = await this.findOne({ ...rest });
+    const countryStored = await this.prisma.country.findUnique({
+      where: { nome_pais: countryName },
+    });
+
+    if (!countryStored) {
+      throw new NotFoundException(`País ${countryName} não encontrado.`);
+    }
+
+    const envStored = await this.findOne({
+      ...rest,
+      countryId: countryStored.id,
+    });
 
     // se já houver um environment com as mesmas caractéristicas, só retorna o existente
     if (envStored) return envStored;
 
-    const countryStored = await this.prisma.country.findUnique({
-      where: { nome_pais: countryName },
-    });
-    if (!countryStored) {
-      throw new NotFoundException(`País com ID ${countryName} não encontrado.`);
-    }
     return await this.prisma.environment.create({
       data: {
         ...rest,
         country: {
           connect: { id: countryStored.id },
         },
+      },
+      include: {
+        country: true,
       },
     });
   }
