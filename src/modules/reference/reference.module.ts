@@ -7,5 +7,6 @@ import { DatabaseModule } from 'src/prisma.module';
   imports: [DatabaseModule],
   controllers: [ReferenceController],
   providers: [ReferenceService],
+  exports: [ReferenceService],
 })
 export default class ReferenceModule {}

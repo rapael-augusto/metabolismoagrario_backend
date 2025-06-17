@@ -12,6 +12,7 @@ import { CountriesController } from '@modules/country/country.controller';
 import { PasswordResetModule } from '@modules/password-reset/password-reset.module';
 import ReferenceModule from '@modules/reference/reference.module';
 import EnvironmentModule from '@modules/environment/environment.module';
+import { CultivarReviewModule } from '@modules/cultivarReview/cultivarReview.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import EnvironmentModule from '@modules/environment/environment.module';
     PasswordResetModule,
     ReferenceModule,
     EnvironmentModule,
+    CultivarReviewModule,
     DatabaseModule, // Usar o nome correto do módulo
   ],
   controllers: [CountriesController],

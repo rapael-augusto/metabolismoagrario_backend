@@ -10,6 +10,9 @@ export class CreateCultivarReviewDto {
   @IsString()
   referenceId: string;
 
+  @IsString()
+  environmentId: string;
+
   @IsOptional()
   @IsDate()
   createdAt?: Date;

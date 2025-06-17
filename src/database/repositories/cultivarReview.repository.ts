@@ -22,11 +22,14 @@ export class CultivarReviewRepository {
     return await this.prisma.cultivarReview.findFirst({ where, include });
   }
 
-  async findById(id: string, include?: Prisma.CultivarReviewInclude) {
-    return await this.prisma.cultivarReview.findUnique({
+  async findById<T extends Prisma.CultivarReviewInclude>(
+    id: string,
+    include?: T,
+  ): Promise<Prisma.CultivarReviewGetPayload<{ include: T }> | null> {
+    return this.prisma.cultivarReview.findUnique({
       where: { id },
       include,
-    });
+    }) as Promise<Prisma.CultivarReviewGetPayload<{ include: T }> | null>;
   }
 
   async findAll(
@@ -39,7 +42,7 @@ export class CultivarReviewRepository {
     });
   }
 
-  async update(id: string, data: UpdateCultivarReviewDto) {
+  async update(id: string, data: Prisma.CultivarReviewUpdateInput) {
     try {
       return this.prisma.cultivarReview.update({
         data,
