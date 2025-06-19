@@ -4,6 +4,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReferenceDTO } from '@modules/reference/dto/create-reference.dto';
 import { UpdateReferenceDto } from '@modules/reference/dto/update-reference.dto';
 import { CreateFullReferenceDTO } from '@modules/reference/dto/create-full-reference.dto';
+import { toTitleCase } from 'src/utils/util';
 
 @Injectable()
 export class ReferenceRepository {
@@ -200,6 +201,7 @@ export class ReferenceRepository {
       });
 
       if (!referenceStored) {
+        referenceData.title = toTitleCase(referenceData.title.trim());
         // Se não existir a referência, cria e associa à cultivar
         referenceStored = await prisma.reference.create({
           data: {

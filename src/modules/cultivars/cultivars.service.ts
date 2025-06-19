@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { UpdateCultivarDto } from './dto/update-cultivar.dto';
 import { CreateCultivarDto } from './dto/create-cultivar.dto';
-import { ReviewStatus, User } from '@prisma/client';
+import { Prisma, ReviewStatus, User } from '@prisma/client';
 import { CultivarReviewRepository } from '@db/repositories/cultivarReview.repository';
 import { UpdateCultivarReviewDto } from './dto/update-cultivar-review.dto';
 import { ReferenceRepository } from '@db/repositories/reference.repository';
@@ -117,84 +117,63 @@ export class CultivarsService {
   }
 
   async listReviews(user: User) {
+    const orderBy: Prisma.CultivarReviewOrderByWithRelationInput = {
+      reviewed_at: 'desc' as const,
+    };
+
+    const include = {
+      Cultivar: {
+        include: {
+          crop: {
+            select: {
+              name: true,
+              scientificName: true,
+            },
+          },
+        },
+      },
+      reference: true,
+      Constants:
+        user.role === 'ADMIN'
+          ? {
+              where: {
+                status: ReviewStatus.PENDING,
+              },
+            }
+          : true,
+      Environment: {
+        include: {
+          country: {
+            select: {
+              nome_pais: true,
+            },
+          },
+        },
+      },
+      requestedBy: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    };
+
     if (user.role === 'ADMIN') {
       return this.cultivarsReviewRepository.findAll(
         {
-          // where
           status: ReviewStatus.PENDING,
         },
-        {
-          // Include
-          Cultivar: {
-            include: {
-              crop: {
-                select: {
-                  name: true,
-                  scientificName: true,
-                },
-              },
-            },
-          },
-          reference: true,
-          Constants: {
-            where: {
-              status: ReviewStatus.PENDING,
-            },
-          },
-          Environment: {
-            include: {
-              country: {
-                select: {
-                  nome_pais: true,
-                },
-              },
-            },
-          },
-          requestedBy: {
-            select: {
-              name: true,
-              email: true,
-            },
-          },
-        },
+        include,
+        orderBy,
       );
     }
 
     return this.cultivarsReviewRepository.findAll(
       {
-        // where
         userId: user.id,
       },
-      {
-        // Include
-        Cultivar: {
-          include: {
-            crop: {
-              select: {
-                name: true,
-                scientificName: true,
-              },
-            },
-          },
-        },
-        reference: true,
-        Constants: true,
-        Environment: {
-          include: {
-            country: {
-              select: {
-                nome_pais: true,
-              },
-            },
-          },
-        },
-        requestedBy: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-      },
+      include,
+      orderBy,
     );
   }
 

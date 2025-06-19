@@ -45,10 +45,10 @@ export class CultivarsRepository {
 
     if (cultivar) {
       cultivar.cultivarReferences = cultivar.cultivarReferences.filter((cr) => {
-        const reviews = cr.reference?.cultivarReviews || [];
+        const reviews = cr.reference.cultivarReviews || [];
         return (
           reviews.length === 0 || // sem reviews
-          reviews.every((review) => review.status === ReviewStatus.APPROVED) // todas aprovadas
+          !reviews.every((review) => review.status === ReviewStatus.PENDING)
         );
       });
     }
@@ -81,33 +81,44 @@ export class CultivarsRepository {
 
     const referencesWithEnvironments = cultivar.cultivarReferences.map(
       (ref) => {
-        const environmentsMap =
-          ref.reference.constants.reduce<EnvironmentGroup>((acc, constant) => {
-            const environmentId = constant.environment.id;
-            if (!acc[environmentId]) {
-              acc[environmentId] = {
-                environment: {
-                  id: constant.environment.id,
-                  climate: constant.environment.climate,
-                  biome: constant.environment.biome,
-                  customBiome: constant.environment.customBiome,
-                  irrigation: constant.environment.irrigation,
-                  countryId: constant.environment.countryId,
-                  soil: constant.environment.soil,
-                  customSoil: constant.environment.customSoil,
-                  cultivationSystem: constant.environment.cultivationSystem,
-                  countryName: constant.environment.country.nome_pais,
-                },
-                constants: [],
-              };
-            }
-            acc[environmentId].constants.push({
+        const environmentsMap: EnvironmentGroup = {};
+
+        for (const constant of ref.reference.constants) {
+          const envId = constant.environment.id;
+
+          if (!environmentsMap[envId]) {
+            environmentsMap[envId] = {
+              environment: {
+                id: constant.environment.id,
+                climate: constant.environment.climate,
+                biome: constant.environment.biome,
+                customBiome: constant.environment.customBiome,
+                irrigation: constant.environment.irrigation,
+                countryId: constant.environment.countryId,
+                soil: constant.environment.soil,
+                customSoil: constant.environment.customSoil,
+                cultivationSystem: constant.environment.cultivationSystem,
+                countryName: constant.environment.country.nome_pais,
+              },
+              constants: [],
+            };
+          }
+
+          // Se tiver pelo menos um PENDING, remove environment
+          if (constant.status === ReviewStatus.PENDING) {
+            delete environmentsMap[envId];
+            continue;
+          }
+
+          // Só adiciona se for aprovado e ainda não foi invalidado
+          if (environmentsMap[envId]) {
+            environmentsMap[envId].constants.push({
               id: constant.id,
               value: constant.value,
               type: constant.type,
             });
-            return acc;
-          }, {});
+          }
+        }
 
         return {
           id: ref.reference.id,

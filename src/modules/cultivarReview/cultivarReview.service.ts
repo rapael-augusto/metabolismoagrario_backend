@@ -39,11 +39,10 @@ export class CultivarReviewService {
         );
 
       const updates: any = {};
-      if (data.reference) {
-        if (reviewStored.reference.status !== ReviewStatus.CHANGES_REQUESTED) {
-          throw new UnauthorizedException('A referência não permite edição');
-        }
-
+      if (
+        data.reference &&
+        reviewStored.reference.status !== ReviewStatus.CHANGES_REQUESTED
+      ) {
         updates.reference = await this.referenceService.update(
           reviewStored.referenceId,
           data.reference,
@@ -71,20 +70,28 @@ export class CultivarReviewService {
         }
       }
 
-      if (data.constants && data.constants.length) {
-        const reviewConstantsIds = reviewStored.Constants.map((c) => c.id);
+      if (data.constants) {
         updates.constants = [];
 
-        for (const constant of data.constants) {
-          if (reviewConstantsIds.includes(constant.id)) {
-            const updated = await this.constantsService.update(
-              constant.id,
-              constant,
-            );
-            updates.constants.push(updated);
-          }
+        for (const constant of reviewStored.Constants) {
+          const newValue = data.constants[constant.type];
+
+          if (newValue === undefined || newValue === null) continue;
+
+          const updatedConstant = await this.constantsService.update(
+            constant.id,
+            {
+              value: newValue,
+            },
+          );
+
+          updates.constants.push(updatedConstant);
         }
       }
+
+      await this.cultivarReviewRepository.update(reviewStored.id, {
+        status: ReviewStatus.PENDING,
+      });
 
       return updates;
     } catch (error) {

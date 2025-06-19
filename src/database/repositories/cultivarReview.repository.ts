@@ -35,10 +35,12 @@ export class CultivarReviewRepository {
   async findAll(
     where?: Prisma.CultivarReviewWhereInput,
     include?: Prisma.CultivarReviewInclude,
+    orderBy?: Prisma.CultivarReviewOrderByWithRelationInput,
   ) {
     return await this.prisma.cultivarReview.findMany({
       where,
       include,
+      orderBy,
     });
   }
 
