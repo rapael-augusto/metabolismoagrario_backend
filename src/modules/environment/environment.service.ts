@@ -1,13 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { EnvironmentRepository } from '@db/repositories/environment.repository';
 import { CreateEnvironmentDTO } from './dto/create-envirionment.dto';
-import { DeleteManyEnvironmentsDto } from '@modules/environment/dto/delete-many-environment.dto';
 import { ConstantsRepository } from '@db/repositories/constants.repository';
-import { CultivarReviewRepository } from '@db/repositories/cultivarReview.repository';
 import { CultivarsRepository } from '@db/repositories/cultivars.repository';
 import { ReferenceRepository } from '@db/repositories/reference.repository';
 import { PrismaClient } from '@prisma/client';
-import { UpdateEnvironmentDTO } from './dto/update-environment.dto';
+import { DeleteEnvironmentDTO } from './dto/delete-environment.dto';
 
 @Injectable()
 export class EnvironmentService {
@@ -15,7 +13,6 @@ export class EnvironmentService {
   constructor(
     private readonly referenceRepository: ReferenceRepository,
     private readonly cultivarsRepository: CultivarsRepository,
-    private readonly cultivarReviewsRepository: CultivarReviewRepository,
     private readonly constantsRepository: ConstantsRepository,
     private readonly environmentRepository: EnvironmentRepository,
   ) {}
@@ -32,24 +29,12 @@ export class EnvironmentService {
     return environment;
   }
 
-  async remove(id: string) {
-    const environment = await this.environmentRepository.findById(id);
-    if (!environment) {
-      throw new NotFoundException(`Environment com ID ${id} não encontrado.`);
-    }
-
-    return await this.environmentRepository.remove(id);
-  }
-
   // Verifica se existe constantes associadas a [referenceID, environmentId]
   // Se houver, apaga as constantes. Verifica se ainda há constantes associadas
   // ao environmentId. Se não houver, deleta o environment
   // se não houver mais constants associadas à referência, apaga a referência
-  async removeManyEnvironments(
-    referenceId: string,
-    data: DeleteManyEnvironmentsDto,
-  ) {
-    const { environments: environmentIds, cultivarId } = data;
+  async remove(data: DeleteEnvironmentDTO) {
+    const { environmentId, referenceId, cultivarId } = data;
 
     const cultivarAssociatedToReference =
       await this.cultivarsRepository.findById(cultivarId);
@@ -57,29 +42,21 @@ export class EnvironmentService {
     if (!cultivarAssociatedToReference)
       throw new NotFoundException('Cultivar não encontrada');
 
-    // Remove constantes associadas aos environments
+    // Remove constantes associadas ao environment
     await this.constantsRepository.removeMany({
       referenceId,
-      environmentId: { in: environmentIds },
+      environmentId,
     });
 
     // verifica se o ambiente é orfão de constantes
-    const environmentsWithConstants = await this.constantsRepository.findMany({
-      environmentId: { in: environmentIds },
+    const envHasConstants = await this.constantsRepository.findMany({
+      environmentId,
     });
 
-    const environmentsWithConstantsIds = environmentsWithConstants.map(
-      (c) => c.environmentId,
-    );
-
-    const environmentsToDelete = environmentIds.filter(
-      (id) => !environmentsWithConstantsIds.includes(id),
-    );
-
-    // Deleta os environments sem constantes
-    const environmentDeleted = await this.environmentRepository.removeMany({
-      id: { in: environmentsToDelete },
-    });
+    if (!envHasConstants) {
+      // Deleta os environments sem constantes
+      await this.environmentRepository.remove(environmentId);
+    }
 
     // Verifica se a referência ainda tem constants
     const referenceHasConstants = await this.constantsRepository.find({
@@ -87,11 +64,9 @@ export class EnvironmentService {
       cultivarId,
     });
 
-    if (referenceHasConstants) return environmentDeleted;
+    if (referenceHasConstants) return;
 
     // remove referência orfã de constantes
     await this.referenceRepository.remove(referenceId);
-
-    return environmentDeleted;
   }
 }

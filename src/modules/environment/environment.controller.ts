@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common';
 import { EnvironmentService } from './environment.service';
 import { CreateEnvironmentDTO } from './dto/create-envirionment.dto';
-import { DeleteManyEnvironmentsDto } from './dto/delete-many-environment.dto';
 
 @Controller('environments')
 export class EnvironmentController {
@@ -11,14 +10,12 @@ export class EnvironmentController {
     return await this.environmentService.create(data);
   }
 
-  @Delete('/reference/:referenceId')
+  @Delete('/:environmentId/reference/:referenceId/cultivar/:cultivarId')
   async remove(
+    @Param('environmentId') environmentId: string,
     @Param('referenceId') referenceId: string,
-    @Body() data: DeleteManyEnvironmentsDto,
+    @Param('cultivarId') cultivarId: string,
   ) {
-    return await this.environmentService.removeManyEnvironments(
-      referenceId,
-      data,
-    );
+    return await this.environmentService.remove({environmentId, referenceId, cultivarId});
   }
 }
