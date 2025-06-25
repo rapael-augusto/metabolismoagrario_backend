@@ -130,7 +130,7 @@ model CultivarReference {
   cultivarId  String    @map("cultivar_id")
   referenceId String    @map("reference_id")
   cultivar    Cultivar  @relation(fields: [cultivarId], references: [id], onDelete: Cascade)
-  reference Reference @relation(fields: [referenceId], references: [id], onDelete: Cascade)
+  reference   Reference @relation(fields: [referenceId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
 
   @@id([cultivarId, referenceId])
