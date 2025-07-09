@@ -15,6 +15,7 @@ import { EnvironmentRepository } from '@db/repositories/environment.repository';
 import { ConstantsRepository } from '@db/repositories/constants.repository';
 import { CreateEnvironmentDTO } from '@modules/environment/dto/create-envirionment.dto';
 import { BiomeTypes, ClimatesTypes } from '@/types/index';
+import { toTitleCase } from 'src/utils/util';
 @Injectable()
 export class ReferenceService {
   private readonly prisma = new PrismaClient();
@@ -114,7 +115,10 @@ export class ReferenceService {
       throw new NotFoundException('Referência não encontrada');
 
     const referenceWithSameTitle = await this.referenceRepository.findOne({
-      title: data.title,
+      title: {
+        equals: data.title,
+        mode: 'insensitive'
+      },
       id: {
         not: referenceId,
       },
@@ -189,6 +193,16 @@ export class ReferenceService {
     if (existingEnvironment) {
       if (existingEnvironment.id === environmentStored.id)
         return existingEnvironment;
+
+      // verifica se o novo ambiente, já não está associado à mesma referência
+      const constantsWithSameEnvironment = await this.prisma.constant.findFirst({where: {
+        referenceId,
+        environmentId: existingEnvironment.id,
+        cultivarId,
+      }})
+
+      if (constantsWithSameEnvironment) 
+        throw new ConflictException('Um mesmo ambiente pra mesma referência foi encontrado. Tente deletá-lo antes')
 
       await this.prisma.constant.updateMany({
         where: { environmentId, referenceId, cultivarId },
