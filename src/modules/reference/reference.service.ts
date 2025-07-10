@@ -157,23 +157,32 @@ export class ReferenceService {
       countryId = country.id;
     }
 
-    const updatedData: CreateEnvironmentDTO = {
-      country: data.country ?? environmentStored.country.nome_pais,
-      climate:
-        (data.climate as ClimatesTypes) ??
-        environmentStored.climate ??
-        undefined,
-      biome: (data.biome as BiomeTypes) ?? environmentStored.biome ?? undefined,
-      customBiome:
-        data.customBiome ?? environmentStored.customBiome ?? undefined,
-      irrigation: data.irrigation ?? environmentStored.irrigation ?? undefined,
-      soil: data.soil ?? environmentStored.soil ?? undefined,
-      customSoil: data.customSoil ?? environmentStored.customSoil ?? undefined,
-      cultivationSystem:
-        data.cultivationSystem ??
-        environmentStored.cultivationSystem ??
-        undefined,
-    };
+  const updatedData: CreateEnvironmentDTO = {
+    country: Object.hasOwn(data, 'country')
+      ? data.country
+      : environmentStored.country.nome_pais,
+    climate: Object.hasOwn(data, 'climate')
+      ? (data.climate as ClimatesTypes)
+      : environmentStored.climate,
+    biome: Object.hasOwn(data, 'biome')
+      ? (data.biome as BiomeTypes)
+      : environmentStored.biome,
+    customBiome: Object.hasOwn(data, 'customBiome')
+      ? data.customBiome
+      : environmentStored.customBiome,
+    irrigation: Object.hasOwn(data, 'irrigation')
+      ? data.irrigation
+      : environmentStored.irrigation,
+    soil: Object.hasOwn(data, 'soil')
+      ? data.soil
+      : environmentStored.soil,
+    customSoil: Object.hasOwn(data, 'customSoil')
+      ? data.customSoil
+      : environmentStored.customSoil,
+    cultivationSystem: Object.hasOwn(data, 'cultivationSystem')
+      ? data.cultivationSystem
+      : environmentStored.cultivationSystem,
+  };
 
     // Verifica se já existe outro ambiente com os mesmos dados
     const existingEnvironment = await this.environmentRepository.findOne(
