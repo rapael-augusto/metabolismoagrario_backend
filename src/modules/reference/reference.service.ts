@@ -69,9 +69,7 @@ export class ReferenceService {
       }
 
       console.error('Erro inesperado ao criar referência:', error);
-      throw new BadRequestException(
-        'Erro ao criar a referência. Por favor, tente novamente ou contate o suporte.',
-      );
+      throw new BadRequestException('Erro inesperado ao criar a referência.');
     }
   }
 
