@@ -14,6 +14,8 @@ export class EnvironmentRepository {
       where: { nome_pais: countryName },
     });
 
+    console.log(countryName, rest);
+
     if (!countryStored) {
       throw new NotFoundException(`País ${countryName} não encontrado.`);
     }
@@ -24,9 +26,12 @@ export class EnvironmentRepository {
     });
 
     // se já houver um environment com as mesmas caractéristicas, só retorna o existente
-    if (envStored) return envStored;
+    if (envStored) {
+      console.log(envStored);
+      return envStored;
+    }
 
-    return await this.prisma.environment.create({
+    const newEnv = await this.prisma.environment.create({
       data: {
         ...rest,
         country: {
@@ -37,6 +42,10 @@ export class EnvironmentRepository {
         country: true,
       },
     });
+
+    console.log(newEnv);
+
+    return newEnv;
   }
 
   async findOne(
