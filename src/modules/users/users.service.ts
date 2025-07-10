@@ -22,6 +22,7 @@ export class UsersService {
     const userExists = await this.userRepository.findByEmail(
       createUserDto.email,
     );
+
     if (userExists) {
       throw new ConflictException('User already exists');
     }
