@@ -18,8 +18,14 @@ export class UserRepository {
     });
   }
 
-  async list(): Promise<User[]> {
-    return this.prisma.user.findMany();
+  async findAll(params?: {
+    where?: Prisma.UserWhereInput;
+    include?: Prisma.UserInclude;
+  }): Promise<User[]> {
+    return this.prisma.user.findMany({
+      where: params?.where,
+      include: params?.include,
+    });
   }
 
   async findById(id: string): Promise<User | null> {
@@ -41,7 +47,10 @@ export class UserRepository {
     });
   }
 
-  async updateRefreshToken(refreshToken: string | null, userId: string): Promise<User> {
+  async updateRefreshToken(
+    refreshToken: string | null,
+    userId: string,
+  ): Promise<User> {
     return this.prisma.user.update({
       where: { id: userId },
       data: { refreshToken },
