@@ -45,12 +45,18 @@ export class UsersService {
     return { ...user, password: undefined };
   }
 
-  async findAll() {
-    return (await this.userRepository.list()).map((user) => ({
-      ...user,
-      password: undefined,
-      refreshToken: undefined,
-    }));
+  async findAll(currentUser: User): Promise<UserResponseDto[]> {
+    const users = await this.userRepository.findAll({
+      where: {
+        id: { not: currentUser.id },
+      },
+    });
+
+    return users.map((user) =>
+      plainToInstance(UserResponseDto, user, {
+        excludeExtraneousValues: true,
+      }),
+    );
   }
 
   async findOne(id: string): Promise<UserResponseDto | null> {
@@ -62,7 +68,6 @@ export class UsersService {
   }
 
   async updateUser(id: string, data: UpdateUserDto): Promise<UserResponseDto> {
-    console.log(data);
     const { email, password, oldPassword } = data;
     const user = await this.userRepository.findById(id);
 
@@ -88,6 +93,39 @@ export class UsersService {
     const userData = await this.userRepository.update(id, data);
 
     return plainToInstance(UserResponseDto, userData, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  async updateProfile(
+    currentUser: User,
+    data: UpdateUserDto,
+  ): Promise<UserResponseDto> {
+    const { email, password, oldPassword } = data;
+
+    const user = await this.userRepository.findById(currentUser.id);
+    if (!user) throw new NotFoundException('Usuário não foi encontrado.');
+
+    if (email && email !== user.email) {
+      const emailInUse = await this.userRepository.findByEmail(email);
+      if (emailInUse && emailInUse.id !== user.id) {
+        throw new ConflictException('Um usuário já existe com esse e-mail.');
+      }
+    }
+
+    if (oldPassword && password) {
+      const passwordMatch = await compare(oldPassword, user.password);
+      if (!passwordMatch) {
+        throw new ConflictException('Senha antiga não corresponde.');
+      }
+      data.password = await bcryptHash(password, 8);
+    }
+
+    delete data.oldPassword;
+
+    const updatedUser = await this.userRepository.update(currentUser.id, data);
+
+    return plainToInstance(UserResponseDto, updatedUser, {
       excludeExtraneousValues: true,
     });
   }

@@ -7,11 +7,12 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { UserRoles } from '@prisma/client';
+import { User, UserRoles } from '@prisma/client';
 import { Role } from 'src/auth/decorators/user-role-decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user-dto';
+import { CurrentUser } from 'src/auth/decorators/current-user-decorator';
 
 @Controller('users')
 export class UsersController {
@@ -25,8 +26,13 @@ export class UsersController {
 
   @Get()
   @Role(UserRoles.ADMIN)
-  async findAll() {
-    return await this.usersService.findAll();
+  async findAll(@CurrentUser() user: User) {
+    return await this.usersService.findAll(user);
+  }
+
+  @Patch('/profile')
+  async updateProfile(@CurrentUser() user: User, @Body() data: UpdateUserDto) {
+    return await this.usersService.updateProfile(user, data);
   }
 
   @Get(':id')
