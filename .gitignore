@@ -1,4 +1,6 @@
 .env
+.env.docker
+
 docker-data
 
 # compiled output

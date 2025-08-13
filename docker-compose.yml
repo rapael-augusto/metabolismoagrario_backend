@@ -1,13 +1,31 @@
 services:
   postgres:
-    image: postgres
-    container_name: app-agroecology-pg
-    restart: unless-stopped
+    image: postgres:16.0
+    restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: America/Sao_Paulo
+    env_file:
+      - .env.docker
     ports:
-      - ${POSTGRES_PORT}:5432
+      - "5433:5432"
+    expose:
+      - "5432"
     volumes:
-      - ./docker-data/db:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app-agroecology-api
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    env_file:
+      - .env.docker
+    ports:
+      - "${PORT}:${PORT}"
+
+volumes:
+  pg-data:
+    driver: local
