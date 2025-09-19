@@ -55,6 +55,9 @@ export class ReferenceRepository {
 
   async listTitles() {
     return await this.prisma.reference.findMany({
+      where: {
+        status: ReviewStatus.APPROVED,
+      },
       select: {
         title: true,
       },

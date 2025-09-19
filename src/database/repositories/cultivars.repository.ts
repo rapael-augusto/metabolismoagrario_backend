@@ -2,7 +2,7 @@ import { PrismaService } from 'src/prisma.service';
 import { UpdateCultivarDto } from '@modules/cultivars/dto/update-cultivar.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCultivarDto } from '@modules/cultivars/dto/create-cultivar.dto';
-import { ConstantTypes, ReviewStatus } from '@prisma/client';
+import { ConstantTypes, Prisma, ReviewStatus } from '@prisma/client';
 
 @Injectable()
 export class CultivarsRepository {
@@ -14,16 +14,26 @@ export class CultivarsRepository {
     });
   }
 
+  async find(where: Prisma.CultivarWhereInput) {
+    return await this.prisma.cultivar.findFirst({ where });
+  }
+
   async findById(id: string) {
     const cultivar = await this.prisma.cultivar.findUnique({
       where: { id },
       include: {
         cultivarReferences: {
+          where: {
+            reference: { status: ReviewStatus.APPROVED },
+          },
           include: {
             reference: {
               include: {
-                cultivarReviews: true,
+                cultivarReviews: {
+                  where: { cultivarId: id },
+                },
                 constants: {
+                  where: { cultivarId: id, status: ReviewStatus.APPROVED },
                   include: {
                     environment: {
                       include: {
@@ -43,15 +53,15 @@ export class CultivarsRepository {
       },
     });
 
-    if (cultivar) {
-      cultivar.cultivarReferences = cultivar.cultivarReferences.filter((cr) => {
-        const reviews = cr.reference.cultivarReviews || [];
-        return (
-          reviews.length === 0 || // sem reviews
-          !reviews.every((review) => review.status === ReviewStatus.PENDING)
-        );
-      });
-    }
+    // if (cultivar) {
+    //   cultivar.cultivarReferences = cultivar.cultivarReferences.filter((cr) => {
+    //     const reviews = cr.reference.cultivarReviews || [];
+    //     return (
+    //       reviews.length === 0 || // sem reviews
+    //       !reviews.every((review) => review.status === ReviewStatus.PENDING)
+    //     );
+    //   });
+    // }
 
     if (!cultivar) {
       return null;
@@ -79,8 +89,8 @@ export class CultivarsRepository {
       };
     };
 
-    const referencesWithEnvironments = cultivar.cultivarReferences.map(
-      (ref) => {
+    const referencesWithEnvironments = cultivar.cultivarReferences
+      .map((ref) => {
         const environmentsMap: EnvironmentGroup = {};
 
         for (const constant of ref.reference.constants) {
@@ -104,13 +114,7 @@ export class CultivarsRepository {
             };
           }
 
-          // Se tiver pelo menos um PENDING, remove environment
-          if (constant.status === ReviewStatus.PENDING) {
-            delete environmentsMap[envId];
-            continue;
-          }
-
-          // Só adiciona se for aprovado e ainda não foi invalidado
+          // Só adiciona constantes aprovadas (já filtradas no banco)
           if (environmentsMap[envId]) {
             environmentsMap[envId].constants.push({
               id: constant.id,
@@ -120,14 +124,20 @@ export class CultivarsRepository {
           }
         }
 
-        return {
+        const refPayload = {
           id: ref.reference.id,
           title: ref.reference.title,
           comment: ref.reference.comment,
-          environments: Object.values(environmentsMap),
+          // Retorna apenas ambientes que possuem constantes aprovadas
+          environments: Object.values(environmentsMap).filter(
+            (e) => e.constants.length > 0,
+          ),
         };
-      },
-    );
+
+        return refPayload;
+      })
+      // Remove referências que, para esta cultivar, não possuem ambientes aprovados
+      .filter((r) => r.environments.length > 0);
 
     return {
       id: cultivar.id,
