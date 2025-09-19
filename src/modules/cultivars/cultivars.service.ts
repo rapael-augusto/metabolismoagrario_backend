@@ -10,22 +10,28 @@ import { CreateCultivarDto } from './dto/create-cultivar.dto';
 import { Prisma, ReviewStatus, User } from '@prisma/client';
 import { CultivarReviewRepository } from '@db/repositories/cultivarReview.repository';
 import { UpdateCultivarReviewDto } from './dto/update-cultivar-review.dto';
-import { ReferenceRepository } from '@db/repositories/reference.repository';
-import { ConstantsRepository } from '@db/repositories/constants.repository';
 import { RejectCultivarReviewDTO } from './dto/reject-cultivar-review.dto';
 
 @Injectable()
 export class CultivarsService {
   constructor(
-    private constantsRepository: ConstantsRepository,
     private cultivarsRepository: CultivarsRepository,
     private cultivarsReviewRepository: CultivarReviewRepository,
-    private referenceRepository: ReferenceRepository,
   ) {}
 
   async create(cropId: string, request: CreateCultivarDto) {
     try {
       const { name } = request;
+
+      const existingCultivar = await this.cultivarsRepository.find({
+        name,
+        cropId,
+      });
+
+      if (existingCultivar) {
+        throw new ConflictException('Cultivar já existe');
+      }
+
       return await this.cultivarsRepository.create({ name, cropId });
     } catch (error) {
       throw new BadRequestException(error);

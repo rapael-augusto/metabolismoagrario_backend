@@ -2,7 +2,11 @@ import {
   CreateCropData,
   CropsRepository,
 } from '@db/repositories/crops.repository';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { CreateCropDto } from './dto/create-crop.dto';
 import { UpdateCropDto } from './dto/update-crop.dto';
@@ -17,6 +21,14 @@ export class CropsService {
       name: request.name,
       scientificName: request.scientificName,
     };
+
+    const existingCrop = await this.cropsRepository.find({
+      name: createCropData.name,
+    });
+
+    if (existingCrop) {
+      throw new ConflictException('Crop already exists');
+    }
 
     return await this.cropsRepository.create(createCropData);
   }

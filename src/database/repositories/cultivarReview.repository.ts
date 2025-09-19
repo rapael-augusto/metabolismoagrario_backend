@@ -2,7 +2,6 @@ import { Prisma, ReviewStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCultivarReviewDto } from '@modules/cultivars/dto/create-cultivar-review.dto';
-import { UpdateCultivarReviewDto } from '@modules/cultivars/dto/update-cultivar-review.dto';
 import { RejectCultivarReviewDTO } from '@modules/cultivars/dto/reject-cultivar-review.dto';
 
 @Injectable()
@@ -163,6 +162,33 @@ export class CultivarReviewRepository {
           status: rejectedStatus,
         },
       });
+
+      // Caso, para esta cultivar e referência, não existam mais constants em status PENDING/CHANGES_REQUESTED/APPROVED,
+      // remove o vínculo em CultivarReferences para evitar pendurar referência sem ambientes válidos.
+      const remainingForCultivarRef = await prisma.constant.count({
+        where: {
+          referenceId: review.referenceId,
+          cultivarId: review.cultivarId,
+          status: {
+            in: [
+              ReviewStatus.PENDING,
+              ReviewStatus.CHANGES_REQUESTED,
+              ReviewStatus.APPROVED,
+            ],
+          },
+        },
+      });
+
+      if (remainingForCultivarRef === 0) {
+        await prisma.cultivarReference.delete({
+          where: {
+            cultivarId_referenceId: {
+              cultivarId: review.cultivarId,
+              referenceId: review.referenceId,
+            },
+          },
+        });
+      }
 
       return updatedReview;
     });

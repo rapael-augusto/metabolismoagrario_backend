@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { UpdateCropDto } from '@modules/crops/dto/update-crop.dto';
-import { ReviewStatus } from '@prisma/client';
+import { Prisma, ReviewStatus } from '@prisma/client';
 
 export interface CreateCropData {
   id: string;
@@ -29,6 +29,10 @@ export class CropsRepository {
 
   async listAll() {
     return await this.prisma.crop.findMany();
+  }
+
+  async find(where: Prisma.CropWhereInput) {
+    return await this.prisma.crop.findFirst({ where });
   }
 
   async update(id: string, data: UpdateCropDto) {

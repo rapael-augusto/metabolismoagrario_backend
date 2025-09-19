@@ -80,7 +80,7 @@ model Reference {
 
 model Crop {
   id             String     @id @default(uuid())
-  name           String
+  name           String     @unique
   scientificName String
   cultivars      Cultivar[]
   createdAt      DateTime   @default(now())
@@ -96,7 +96,9 @@ model Cultivar {
   updatedAt         DateTime     @updatedAt
   reviews           CultivarReview[]
   cultivarReferences CultivarReference[]
-  constants         Constant[]  
+  constants         Constant[]
+
+  @@unique([name, cropId])
 }
 
 model PasswordResetToken {
